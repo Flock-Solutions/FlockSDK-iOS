@@ -14,14 +14,14 @@ public class Flock: NSObject {
     
     public private(set) static var isInitialized = false
     
-    private var publicAccessKey: String
-    private var campaignId: String
-    private var baseApiURL: URL
+    private let publicAccessKey: String
+    private let campaignId: String
+    private let urlBuilder: URLBuilder
     
     private init(publicAccessKey: String, campaignId: String, overrideApiURL: String? = nil) {
         self.publicAccessKey = publicAccessKey
         self.campaignId = campaignId
-        self.baseApiURL = URL(string: overrideApiURL ?? "https://api.withflock.com")!
+        self.urlBuilder = URLBuilder(baseURL: overrideApiURL)
     }
     
     public static var shared: Flock {
@@ -49,9 +49,7 @@ public class Flock: NSObject {
         
         Task {
             do {
-                let response = try await flock?.ping()
-                let id = response?.id ?? ""
-                print("Pinged \(id)")
+                try await flock?.ping()
             } catch {
                 print("Error pinging server:", error)
             }
@@ -63,18 +61,15 @@ public class Flock: NSObject {
     /**
      Ping the server to make sure the integration is working
      */
+    @discardableResult
     public func ping() async throws -> PingResponse {
-        guard let url = URL(string: "/campaigns/\(self.campaignId)/ping", relativeTo: self.baseApiURL) else {
-            throw URLError(.badURL)
-        }
+        let url = try self.urlBuilder.build(path: "/campaigns/\(self.campaignId)/ping")
         
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.addValue(self.publicAccessKey, forHTTPHeaderField: "Authorization")
         
         let (data, response) = try await URLSession.shared.data(for: request)
-        
-        print("Response: \(response). Data: \(data)")
         
         guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
             throw URLError(.badServerResponse)
