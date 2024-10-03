@@ -6,7 +6,7 @@ import Alamofire
 // https://docs.swift.org/swift-book
 @available(iOS 14.0, *)
 @MainActor
-class Flock: NSObject {
+public class Flock: NSObject {
     private static var flock: Flock?
     private static let logger = Logger(
         subsystem: Bundle.main.bundleIdentifier!,

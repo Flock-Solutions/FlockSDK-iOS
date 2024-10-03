@@ -1,5 +1,5 @@
 {
-  "originHash" : "5cc40a9a336edc34ec5385858dffc235d4199f709b211ff57966470dd65ab967",
+  "originHash" : "a3679f727dbacfd12640041f8f201f9a064fd86753bfc081bb6a4a83c3392b37",
   "pins" : [
     {
       "identity" : "alamofire",
@@ -11,12 +11,12 @@
       }
     },
     {
-      "identity" : "flocksdk",
+      "identity" : "flocksdk-ios",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/hoadnguyen/FlockSDK.git",
+      "location" : "https://github.com/hoadnguyen/FlockSDK-iOS.git",
       "state" : {
         "branch" : "main",
-        "revision" : "d6282dd9397e44a71d571b3ce1729b7bb9f7406a"
+        "revision" : "9442e420ae42ee7c69296e1061b0593eab25e4c9"
       }
     }
   ],
