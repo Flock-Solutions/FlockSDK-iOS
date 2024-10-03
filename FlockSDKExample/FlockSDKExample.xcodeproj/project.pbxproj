@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		C61FFB422CAE66C200FCE0E4 /* FlockSDK in Frameworks */ = {isa = PBXBuildFile; productRef = C61FFB412CAE66C200FCE0E4 /* FlockSDK */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		C61FFB1F2CAE579100FCE0E4 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -52,6 +56,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C61FFB422CAE66C200FCE0E4 /* FlockSDK in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -112,6 +117,7 @@
 			);
 			name = FlockSDKExample;
 			packageProductDependencies = (
+				C61FFB412CAE66C200FCE0E4 /* FlockSDK */,
 			);
 			productName = FlockSDKExample;
 			productReference = C61FFB0E2CAE579000FCE0E4 /* FlockSDKExample.app */;
@@ -196,7 +202,7 @@
 			mainGroup = C61FFB052CAE579000FCE0E4;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				C61FFB3F2CAE65F300FCE0E4 /* XCRemoteSwiftPackageReference "FlockSDK-iOS" */,
+				C61FFB402CAE66C200FCE0E4 /* XCRemoteSwiftPackageReference "FlockSDK-iOS" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = C61FFB0F2CAE579000FCE0E4 /* Products */;
@@ -557,7 +563,7 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		C61FFB3F2CAE65F300FCE0E4 /* XCRemoteSwiftPackageReference "FlockSDK-iOS" */ = {
+		C61FFB402CAE66C200FCE0E4 /* XCRemoteSwiftPackageReference "FlockSDK-iOS" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/hoadnguyen/FlockSDK-iOS.git";
 			requirement = {
@@ -566,6 +572,14 @@
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		C61FFB412CAE66C200FCE0E4 /* FlockSDK */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C61FFB402CAE66C200FCE0E4 /* XCRemoteSwiftPackageReference "FlockSDK-iOS" */;
+			productName = FlockSDK;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = C61FFB062CAE579000FCE0E4 /* Project object */;
 }
