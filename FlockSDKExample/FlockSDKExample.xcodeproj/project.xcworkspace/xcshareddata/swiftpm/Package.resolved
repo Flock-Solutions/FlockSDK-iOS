@@ -2,21 +2,12 @@
   "originHash" : "a3679f727dbacfd12640041f8f201f9a064fd86753bfc081bb6a4a83c3392b37",
   "pins" : [
     {
-      "identity" : "alamofire",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/Alamofire/Alamofire.git",
-      "state" : {
-        "revision" : "f455c2975872ccd2d9c81594c658af65716e9b9a",
-        "version" : "5.9.1"
-      }
-    },
-    {
       "identity" : "flocksdk-ios",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/hoadnguyen/FlockSDK-iOS.git",
       "state" : {
         "branch" : "main",
-        "revision" : "a4bf32bd7ae531b7f3233a451e9abd091d380405"
+        "revision" : "0a44f4d8a449e862f1ba3008e2902508616f3c71"
       }
     }
   ],

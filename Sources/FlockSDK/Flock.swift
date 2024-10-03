@@ -64,9 +64,11 @@ public class Flock: NSObject {
      Ping the server to make sure the integration is working
      */
     public func ping() async throws -> PingResponse {
-        guard let url = URL(string: "/ping", relativeTo: self.baseApiURL) else {
+        guard let url = URL(string: "/\(self.campaignId)/ping", relativeTo: self.baseApiURL) else {
             throw URLError(.badURL)
         }
+        
+        print("Pinging the URL: \(url)")
         
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
