@@ -196,7 +196,7 @@
 			mainGroup = C61FFB052CAE579000FCE0E4;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				C61FFB3E2CAE62E100FCE0E4 /* XCRemoteSwiftPackageReference "FlockSDK-iOS" */,
+				C61FFB3F2CAE65F300FCE0E4 /* XCRemoteSwiftPackageReference "FlockSDK-iOS" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = C61FFB0F2CAE579000FCE0E4 /* Products */;
@@ -557,7 +557,7 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		C61FFB3E2CAE62E100FCE0E4 /* XCRemoteSwiftPackageReference "FlockSDK-iOS" */ = {
+		C61FFB3F2CAE65F300FCE0E4 /* XCRemoteSwiftPackageReference "FlockSDK-iOS" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/hoadnguyen/FlockSDK-iOS.git";
 			requirement = {
