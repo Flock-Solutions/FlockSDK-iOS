@@ -1,6 +1,5 @@
 import Foundation
 import os
-import Alamofire
 
 // The Swift Programming Language
 // https://docs.swift.org/swift-book
@@ -12,21 +11,17 @@ public class Flock: NSObject {
         subsystem: Bundle.main.bundleIdentifier!,
         category: String(describing: Flock.self)
     )
-    private static let baseUrl = URL("https://api.withflock.com")
     
     public private(set) static var isInitialized = false
     
     private var publicAccessKey: String
     private var campaignId: String
-    private var session: Session
+    private var baseApiURL: URL
     
     private init(publicAccessKey: String, campaignId: String, overrideApiURL: String? = nil) {
         self.publicAccessKey = publicAccessKey
         self.campaignId = campaignId
-        
-        
-        let interceptor = ApiRequestInterceptor(baseURL: overrideApiURL ?? "https://api.withflock.com", apiKey: publicAccessKey)
-        self.session = Session(interceptor: interceptor)
+        self.baseApiURL = URL(string: overrideApiURL ?? "https://api.withflock.com")!
     }
     
     public static var shared: Flock {
@@ -51,7 +46,16 @@ public class Flock: NSObject {
         
         flock = Flock(publicAccessKey: publicAccessKey, campaignId: campaignId, overrideApiURL: overrideApiURL)
         isInitialized = true
-        flock?.ping()
+        
+        Task {
+            do {
+                let response = try await flock?.ping()
+                let id = response?.id ?? ""
+                print("Pinged \(id)")
+            } catch {
+                print("Error pinging server:", error)
+            }
+        }
         
         return shared
     }
@@ -59,7 +63,22 @@ public class Flock: NSObject {
     /**
      Ping the server to make sure the integration is working
      */
-    public func ping() -> Void {
-        self.session.request("/campaign/\(self.campaignId)/ping").validate()
+    public func ping() async throws -> PingResponse {
+        guard let url = URL(string: "/ping", relativeTo: self.baseApiURL) else {
+            throw URLError(.badURL)
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.addValue(self.publicAccessKey, forHTTPHeaderField: "Authorization")
+        
+        let (data, response) = try await URLSession.shared.data(for: request)
+        
+        guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
+            throw URLError(.badServerResponse)
+        }
+        
+        let json = try JSONDecoder().decode(PingResponse.self, from: data)
+        return json
     }
 }
