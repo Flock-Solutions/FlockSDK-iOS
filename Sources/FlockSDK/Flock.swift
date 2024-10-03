@@ -68,7 +68,7 @@ public class Flock: NSObject {
             throw URLError(.badURL)
         }
         
-        print("Pinging the URL: \(url)")
+        print("Pinging the URL: \(url.absoluteString)")
         
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
