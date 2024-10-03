@@ -20,7 +20,7 @@ let package = Package(
         .target(
             name: "FlockSDK",
             dependencies: ["Alamofire"],
-            path: "Sources/FlockSDK"
+            path: "Sources"
         ),
         .testTarget(
             name: "FlockSDKTests",
