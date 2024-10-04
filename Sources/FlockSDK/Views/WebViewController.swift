@@ -55,15 +55,18 @@ class WebViewController: UIViewController, WKNavigationDelegate {
         closeButton = UIButton(type: .close)
         closeButton.setTitleColor(.white, for: .normal)
         closeButton.clipsToBounds = true
-        closeButton.layer.cornerRadius = closeButton.frame.size.width / 2
+        closeButton.layer.cornerRadius = 24
         closeButton.backgroundColor = UIColor.black.withAlphaComponent(0.6)
+        closeButton.setTitleColor(.white, for: .normal)
         closeButton.addTarget(self, action: #selector(closeTapped), for: .touchUpInside)
         closeButton.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(closeButton)
         
         NSLayoutConstraint.activate([
             closeButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
-            closeButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
+            closeButton.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
+            closeButton.widthAnchor.constraint(equalToConstant: 48),
+            closeButton.heightAnchor.constraint(equalToConstant: 48)
         ])
     }
     
