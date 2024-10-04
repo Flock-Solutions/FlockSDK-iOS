@@ -1,4 +1,6 @@
 import Foundation
+import SwiftUI
+import UIKit
 import os
 
 // The Swift Programming Language
@@ -16,12 +18,12 @@ public class Flock: NSObject {
     
     private let publicAccessKey: String
     private let campaignId: String
-    private let urlBuilder: URLBuilder
+    private let apiClient: APIClient
     
     private init(publicAccessKey: String, campaignId: String, overrideApiURL: String? = nil) {
         self.publicAccessKey = publicAccessKey
         self.campaignId = campaignId
-        self.urlBuilder = URLBuilder(baseURL: overrideApiURL)
+        self.apiClient = APIClient(apiKey: self.publicAccessKey, baseURL: overrideApiURL)
     }
     
     public static var shared: Flock {
@@ -47,13 +49,7 @@ public class Flock: NSObject {
         flock = Flock(publicAccessKey: publicAccessKey, campaignId: campaignId, overrideApiURL: overrideApiURL)
         isInitialized = true
         
-        Task {
-            do {
-                try await flock?.ping()
-            } catch {
-                print("Error pinging server:", error)
-            }
-        }
+        flock?.ping()
         
         return shared
     }
@@ -61,21 +57,44 @@ public class Flock: NSObject {
     /**
      Ping the server to make sure the integration is working
      */
-    @discardableResult
-    public func ping() async throws -> PingResponse {
-        let url = try self.urlBuilder.build(path: "/campaigns/\(self.campaignId)/ping")
-        
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.addValue(self.publicAccessKey, forHTTPHeaderField: "Authorization")
-        
-        let (data, response) = try await URLSession.shared.data(for: request)
-        
-        guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
-            throw URLError(.badServerResponse)
+    public func ping() -> Void {
+        Task {
+            do {
+                try await self.apiClient.ping(campaignId: self.campaignId)
+            } catch {
+                Flock.logger.error("Error pinging server: \(error)")
+            }
         }
-        
-        let json = try JSONDecoder().decode(PingResponse.self, from: data)
-        return json
+    }
+    
+    /**
+     Identify customers to keep a record in Flock
+     */
+    public func identify(externalUserId: String, email: String, name: String?) -> Void {
+        Task {
+            do {
+                let identifyRequest = IdentifyRequest(externalUserId: externalUserId, email: email, name: name, campaignId: self.campaignId)
+                try await self.apiClient.identify(identifyRequest: identifyRequest)
+            } catch {
+                Flock.logger.error("Error identifying customer: \(error)")
+            }
+        }
+    }
+    
+    /**
+     Open Referral Page
+     */
+    public func openReferralView(from viewController: UIViewController? = nil) {
+        let webViewController = WebViewController(url: URL(string: "https://google.com")!)
+                
+        if let viewController = viewController {
+            viewController.present(webViewController, animated: true, completion: nil)
+        } else {
+            // For SwiftUI, we'll use UIApplication to present the view controller
+            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+               let rootViewController = windowScene.windows.first?.rootViewController {
+                rootViewController.present(webViewController, animated: true, completion: nil)
+            }
+        }
     }
 }
