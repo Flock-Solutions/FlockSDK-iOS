@@ -84,23 +84,22 @@ public class Flock: NSObject {
     /**
      Open Referral Page
      */
-    public func openReferralView(from navigationController: UINavigationController?) {
+    public func openReferralView() {
         let webViewController = WebViewController(url: URL(string: "https://google.com")!)
                 
-        if let navigationController = navigationController {
-            navigationController.pushViewController(webViewController, animated: true)
-        } else {
-            // For SwiftUI or when there's no navigation controller,
-            // we'll use a helper method to find the top-most view controller
-            if let topViewController = UIApplication.shared.topMostViewController() {
-                if let navController = topViewController.navigationController {
-                    navController.pushViewController(webViewController, animated: true)
-                } else {
-                    // If there's no navigation controller, we'll present it modally as a fallback
-                    let navController = UINavigationController(rootViewController: webViewController)
-                    topViewController.modalPresentationStyle = .fullScreen
-                    topViewController.present(navController, animated: true, completion: nil)
-                }
+        if let topViewController = UIApplication.shared.topMostViewController() {
+            if let navigationController = topViewController.navigationController {
+                // Push onto existing navigation stack
+                navigationController.pushViewController(webViewController, animated: true)
+            } else if let tabBarController = topViewController as? UITabBarController,
+                      let selectedNavController = tabBarController.selectedViewController as? UINavigationController {
+                // Push onto the selected tab's navigation stack
+                selectedNavController.pushViewController(webViewController, animated: true)
+            } else {
+                // Present modally with a new navigation controller
+                let navController = UINavigationController(rootViewController: webViewController)
+                topViewController.modalPresentationStyle = .fullScreen
+                topViewController.present(navController, animated: true, completion: nil)
             }
         }
     }
