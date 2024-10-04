@@ -54,6 +54,8 @@ class WebViewController: UIViewController, WKNavigationDelegate {
     private func setupCloseButton() {
         closeButton = UIButton(type: .close)
         closeButton.setTitleColor(.white, for: .normal)
+        closeButton.clipsToBounds = true
+        closeButton.layer.cornerRadius = closeButton.frame.size.width / 2
         closeButton.backgroundColor = UIColor.black.withAlphaComponent(0.6)
         closeButton.addTarget(self, action: #selector(closeTapped), for: .touchUpInside)
         closeButton.translatesAutoresizingMaskIntoConstraints = false

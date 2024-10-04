@@ -16,7 +16,7 @@ struct ContentView: View {
                 .foregroundStyle(.tint)
             Text("Hello, world!")
             Button("Open Referral") {
-                Flock.shared.openReferralView()
+                Flock.shared.openReferralView(style: .modal)
             }
         }
         .padding()
