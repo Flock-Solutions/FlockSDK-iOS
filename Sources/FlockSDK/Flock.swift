@@ -85,7 +85,7 @@ public class Flock: NSObject {
      Open Referral Page
      */
     public func openReferralView(style: WebViewPresentationStyle? = .fullscreen) {
-        let webViewController = WebViewController(url: URL(string: "https://google.com")!)
+        let webViewController = WebViewController(url: URL(string: "http://localhost:4200/referrals/AWD43SZ")!)
                 
         if let topViewController = UIApplication.shared.topMostViewController() {
             if style == .modal {

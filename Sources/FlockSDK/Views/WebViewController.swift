@@ -54,7 +54,7 @@ class WebViewController: UIViewController, WKNavigationDelegate {
     private func setupCloseButton() {
         closeButton = UIButton(type: .roundedRect)
         closeButton.setTitle("✕", for: .normal)
-        closeButton.titleLabel?.font = UIFont.systemFont(ofSize: 24)
+        closeButton.titleLabel?.font = UIFont.systemFont(ofSize: 20)
         closeButton.setTitleColor(.white, for: .normal)
         closeButton.clipsToBounds = true
         closeButton.layer.cornerRadius = 16
