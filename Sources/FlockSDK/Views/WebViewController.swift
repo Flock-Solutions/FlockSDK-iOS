@@ -52,7 +52,8 @@ class WebViewController: UIViewController, WKNavigationDelegate {
     }
     
     private func setupCloseButton() {
-        closeButton = UIButton(type: .close)
+        closeButton = UIButton(type: .roundedRect)
+        closeButton.setTitle("x", for: .normal)
         closeButton.setTitleColor(.white, for: .normal)
         closeButton.tintColor = .white
         closeButton.clipsToBounds = true
