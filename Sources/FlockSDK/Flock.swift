@@ -84,11 +84,13 @@ public class Flock: NSObject {
     /**
      Open Referral Page
      */
-    public func openReferralView(from viewController: UIViewController? = nil) {
+    public func openReferralView(style: WebViewPresentationStyle? = .fullscreen) {
         let webViewController = WebViewController(url: URL(string: "https://google.com")!)
                 
         if let topViewController = UIApplication.shared.topMostViewController() {
-            if let navigationController = topViewController.navigationController {
+            if style == .modal {
+                topViewController.present(webViewController, animated: true, completion: nil)
+            } else if let navigationController = topViewController.navigationController {
                 navigationController.pushViewController(webViewController, animated: true)
             } else if let tabBarController = topViewController as? UITabBarController,
                       let selectedNavController = tabBarController.selectedViewController as? UINavigationController {
