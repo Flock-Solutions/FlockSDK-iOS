@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import FlockSDK
 
 struct ContentView: View {
     var body: some View {
@@ -14,6 +15,9 @@ struct ContentView: View {
                 .imageScale(.large)
                 .foregroundStyle(.tint)
             Text("Hello, world!")
+            Button("Open Referral") {
+                Flock.shared.openReferralView()
+            }
         }
         .padding()
     }

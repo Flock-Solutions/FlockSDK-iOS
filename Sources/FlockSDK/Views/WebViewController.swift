@@ -29,10 +29,8 @@ class WebViewController: UIViewController, WKNavigationDelegate {
         webView = WKWebView(frame: view.bounds, configuration: webConfiguration)
         webView.navigationDelegate = self
         view.addSubview(webView)
-        
-        if let url = URL(string: "https://www.google.com") {
-            webView.load(URLRequest(url: url))
-        }
+    
+        webView.load(URLRequest(url: self.url))
         
         // Add a close button
         let closeButton = UIButton(type: .system)

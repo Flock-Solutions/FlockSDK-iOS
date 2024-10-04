@@ -84,16 +84,23 @@ public class Flock: NSObject {
     /**
      Open Referral Page
      */
-    public func openReferralView(from viewController: UIViewController? = nil) {
+    public func openReferralView(from navigationController: UINavigationController?) {
         let webViewController = WebViewController(url: URL(string: "https://google.com")!)
                 
-        if let viewController = viewController {
-            viewController.present(webViewController, animated: true, completion: nil)
+        if let navigationController = navigationController {
+            navigationController.pushViewController(webViewController, animated: true)
         } else {
-            // For SwiftUI, we'll use UIApplication to present the view controller
-            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-               let rootViewController = windowScene.windows.first?.rootViewController {
-                rootViewController.present(webViewController, animated: true, completion: nil)
+            // For SwiftUI or when there's no navigation controller,
+            // we'll use a helper method to find the top-most view controller
+            if let topViewController = UIApplication.shared.topMostViewController() {
+                if let navController = topViewController.navigationController {
+                    navController.pushViewController(webViewController, animated: true)
+                } else {
+                    // If there's no navigation controller, we'll present it modally as a fallback
+                    let navController = UINavigationController(rootViewController: webViewController)
+                    topViewController.modalPresentationStyle = .fullScreen
+                    topViewController.present(navController, animated: true, completion: nil)
+                }
             }
         }
     }
