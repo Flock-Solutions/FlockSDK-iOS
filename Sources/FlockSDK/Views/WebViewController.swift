@@ -8,6 +8,7 @@
 import UIKit
 import WebKit
 
+@available(iOS 13.0, *)
 class WebViewController: UIViewController, WKNavigationDelegate {
     private var webView: WKWebView!
     private let url: URL
@@ -51,8 +52,7 @@ class WebViewController: UIViewController, WKNavigationDelegate {
     }
     
     private func setupCloseButton() {
-        closeButton = UIButton(type: .system)
-        closeButton.setTitle("Close", for: .normal)
+        closeButton = UIButton(type: .close)
         closeButton.setTitleColor(.white, for: .normal)
         closeButton.backgroundColor = UIColor.black.withAlphaComponent(0.6)
         closeButton.layer.cornerRadius = 15
@@ -87,7 +87,11 @@ class WebViewController: UIViewController, WKNavigationDelegate {
             dismiss(animated: true, completion: nil)
         }
     }
-
+    
+    private func updateProgress() {
+        progressView.progress = Float(webView.estimatedProgress)
+        progressView.isHidden = webView.estimatedProgress == 1
+    }
     
     deinit {
         progressObservation?.invalidate()
