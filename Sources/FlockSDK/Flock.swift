@@ -87,13 +87,15 @@ public class Flock: NSObject {
     public func openReferralView(from viewController: UIViewController? = nil) {
         let webViewController = WebViewController(url: URL(string: "https://google.com")!)
                 
-        if let viewController = viewController {
-            viewController.present(webViewController, animated: true, completion: nil)
-        } else {
-            // For SwiftUI, we'll use UIApplication to present the view controller
-            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-               let rootViewController = windowScene.windows.first?.rootViewController {
-                rootViewController.present(webViewController, animated: true, completion: nil)
+        if let topViewController = UIApplication.shared.topMostViewController() {
+            if let navigationController = topViewController.navigationController {
+                navigationController.pushViewController(webViewController, animated: true)
+            } else if let tabBarController = topViewController as? UITabBarController,
+                      let selectedNavController = tabBarController.selectedViewController as? UINavigationController {
+                selectedNavController.pushViewController(webViewController, animated: true)
+            } else {
+                webViewController.modalPresentationStyle = .fullScreen
+                topViewController.present(webViewController, animated: true, completion: nil)
             }
         }
     }
