@@ -19,6 +19,9 @@ class WebViewController: UIViewController, WKNavigationDelegate {
     init(url: URL) {
         self.url = url
         super.init(nibName: nil, bundle: nil)
+        
+        webView = WKWebView()
+        webView.load(URLRequest(url: url))
     }
     
     required init?(coder: NSCoder) {
@@ -31,13 +34,11 @@ class WebViewController: UIViewController, WKNavigationDelegate {
         setupWebView()
         setupCloseButton()
         setupProgressView()
-        
-        webView.load(URLRequest(url: url))
     }
     
     private func setupWebView() {
-        let webConfiguration = WKWebViewConfiguration()
-        webView = WKWebView(frame: view.bounds, configuration: webConfiguration)
+        webView.frame = view.bounds
+        webView.backgroundColor = .black
         webView.navigationDelegate = self
         webView.allowsBackForwardNavigationGestures = true
         webView.translatesAutoresizingMaskIntoConstraints = false
