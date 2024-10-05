@@ -31,6 +31,7 @@ class WebViewController: UIViewController, WKNavigationDelegate {
         
         setupWebView()
         setupCloseButton()
+        setupShareButton()
         setupProgressView()
     }
     
