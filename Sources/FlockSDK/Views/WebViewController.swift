@@ -20,8 +20,6 @@ class WebViewController: UIViewController, WKNavigationDelegate {
     init(url: URL) {
         self.url = url
         super.init(nibName: nil, bundle: nil)
-        
-        self.preloadWebView()
     }
     
     required init?(coder: NSCoder) {
@@ -37,12 +35,10 @@ class WebViewController: UIViewController, WKNavigationDelegate {
         setupProgressView()
     }
     
-    private func preloadWebView() {
-        webView = WKWebView()
-        webView.load(URLRequest(url: url))
-    }
-    
     private func setupWebView() {
+        let configuration = WKWebViewConfiguration()
+        webView = WKWebView(frame: view.bounds, configuration: configuration)
+        webView.load(URLRequest(url: url))
         webView.frame = view.bounds
         webView.backgroundColor = .black
         webView.navigationDelegate = self
@@ -65,7 +61,7 @@ class WebViewController: UIViewController, WKNavigationDelegate {
         closeButton.setTitleColor(.white, for: .normal)
         closeButton.clipsToBounds = true
         closeButton.layer.cornerRadius = 16
-        closeButton.backgroundColor = UIColor.black.withAlphaComponent(0.6)
+        closeButton.backgroundColor = UIColor.white.withAlphaComponent(0.4)
         closeButton.setTitleColor(.white, for: .normal)
         closeButton.addTarget(self, action: #selector(closeTapped), for: .touchUpInside)
         closeButton.translatesAutoresizingMaskIntoConstraints = false
@@ -85,7 +81,7 @@ class WebViewController: UIViewController, WKNavigationDelegate {
         shareButton.tintColor = .white
         shareButton.clipsToBounds = true
         shareButton.layer.cornerRadius = 16
-        shareButton.backgroundColor = UIColor.black.withAlphaComponent(0.6)
+        shareButton.backgroundColor = UIColor.white.withAlphaComponent(0.4)
         shareButton.setTitleColor(.white, for: .normal)
         shareButton.addTarget(self, action: #selector(closeTapped), for: .touchUpInside)
         shareButton.translatesAutoresizingMaskIntoConstraints = false
