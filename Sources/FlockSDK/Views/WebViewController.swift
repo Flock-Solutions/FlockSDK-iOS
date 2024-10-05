@@ -33,7 +33,7 @@ class WebViewController: UIViewController, WKNavigationDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        if let webView = webView, let closeButton = closeButton, let progressView = progressView {
+        if let webView = webView, let closeButton = closeButton, let shareButton = shareButton, let progressView = progressView {
             view.addSubview(webView)
             view.addSubview(closeButton)
             view.addSubview(shareButton)
