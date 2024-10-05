@@ -84,13 +84,13 @@ class WebViewController: UIViewController, WKNavigationDelegate {
     private func setupShareButton() {
         shareButton = UIButton(type: .roundedRect)
         shareButton.setImage(UIImage(named: "share-icon", in: .module, with: nil), for: .normal)
-        shareButton.imageEdgeInsets = UIEdgeInsets(top: 8, left: 8, bottom: 8, right: 8)
+        shareButton.imageEdgeInsets = UIEdgeInsets(top: 5, left: 5, bottom: 5, right: 5)
         shareButton.tintColor = .white
         shareButton.clipsToBounds = true
         shareButton.layer.cornerRadius = 16
         shareButton.backgroundColor = UIColor.white.withAlphaComponent(0.4)
         shareButton.setTitleColor(.white, for: .normal)
-        shareButton.addTarget(self, action: #selector(closeTapped), for: .touchUpInside)
+        shareButton.addTarget(self, action: #selector(shareTapped), for: .touchUpInside)
         shareButton.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(shareButton)
         
@@ -120,6 +120,16 @@ class WebViewController: UIViewController, WKNavigationDelegate {
             navController.popViewController(animated: true)
         } else {
             dismiss(animated: true, completion: nil)
+        }
+    }
+    
+    @objc func shareTapped(sender: UIView) {
+        let message = "Hello world"
+        let activityVC = UIActivityViewController(activityItems: [message], applicationActivities: nil)
+        activityVC.popoverPresentationController?.sourceView = sender
+        
+        if let topViewController = UIApplication.shared.topMostViewController() {
+            topViewController.present(activityVC, animated: true, completion: nil)
         }
     }
     
