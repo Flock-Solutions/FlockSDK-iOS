@@ -32,11 +32,11 @@ class WebViewController: UIViewController, WKNavigationDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        displayWebView()
-        displayCloseButton()
-        dislayShareButton()
-        displayProgressView()
+
+        loadWebView()
+        loadCloseButton()
+        loadShareButton()
+        loadProgressView()
     }
     
     /*
@@ -53,7 +53,7 @@ class WebViewController: UIViewController, WKNavigationDelegate {
         return webView
     }
     
-    private func displayWebView() {
+    private func loadWebView() {
         if let webView = webView {
             view.addSubview(webView)
             NSLayoutConstraint.activate([
@@ -83,7 +83,7 @@ class WebViewController: UIViewController, WKNavigationDelegate {
         return closeButton
     }
     
-    private func displayCloseButton() {
+    private func loadCloseButton() {
         if  let closeButton = closeButton {
             view.addSubview(closeButton)
             NSLayoutConstraint.activate([
@@ -110,7 +110,7 @@ class WebViewController: UIViewController, WKNavigationDelegate {
         return shareButton
     }
     
-    private func dislayShareButton() {
+    private func loadShareButton() {
         if let shareButton = shareButton {
             view.addSubview(shareButton)
             NSLayoutConstraint.activate([
@@ -132,7 +132,7 @@ class WebViewController: UIViewController, WKNavigationDelegate {
         return progressView
     }
     
-    private func displayProgressView() {
+    private func loadProgressView() {
         if let progressView = progressView {
             view.addSubview(progressView)
             NSLayoutConstraint.activate([
