@@ -13,7 +13,6 @@ class WebViewController: UIViewController, WKNavigationDelegate {
     private var webView: WKWebView!
     private let url: URL
     private var closeButton: UIButton!
-    private var shareButton: UIButton!
     private var progressView: UIProgressView!
     private var progressObservation: NSKeyValueObservation?
     
@@ -31,18 +30,18 @@ class WebViewController: UIViewController, WKNavigationDelegate {
         
         setupWebView()
         setupCloseButton()
-        setupShareButton()
         setupProgressView()
+        
+        webView.load(URLRequest(url: url))
     }
     
     private func setupWebView() {
         let webConfiguration = WKWebViewConfiguration()
         webView = WKWebView(frame: view.bounds, configuration: webConfiguration)
-        webView.backgroundColor = .black
         webView.navigationDelegate = self
         webView.allowsBackForwardNavigationGestures = true
         webView.translatesAutoresizingMaskIntoConstraints = false
-        webView.load(URLRequest(url: url))
+        view.addSubview(webView)
         
         NSLayoutConstraint.activate([
             webView.topAnchor.constraint(equalTo: view.topAnchor),
@@ -70,29 +69,6 @@ class WebViewController: UIViewController, WKNavigationDelegate {
             closeButton.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
             closeButton.widthAnchor.constraint(equalToConstant: 32),
             closeButton.heightAnchor.constraint(equalToConstant: 32)
-        ])
-    }
-    
-    private func setupShareButton() {
-        shareButton = UIButton(type: .roundedRect)
-        
-        let shareImg = UIImage(named: "share-icon", in: .module, with: nil)!
-        shareButton.setImage(shareImg, for: .normal)
-        shareButton.titleLabel?.font = UIFont.systemFont(ofSize: 20)
-        shareButton.setTitleColor(.white, for: .normal)
-        shareButton.clipsToBounds = true
-        shareButton.layer.cornerRadius = 16
-        shareButton.backgroundColor = UIColor.black.withAlphaComponent(0.6)
-        shareButton.setTitleColor(.white, for: .normal)
-        shareButton.addTarget(self, action: #selector(closeTapped), for: .touchUpInside)
-        shareButton.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(shareButton)
-        
-        NSLayoutConstraint.activate([
-            shareButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
-            shareButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: -16),
-            shareButton.widthAnchor.constraint(equalToConstant: 32),
-            shareButton.heightAnchor.constraint(equalToConstant: 32)
         ])
     }
     
