@@ -89,7 +89,7 @@ class WebViewController: UIViewController, WKNavigationDelegate {
         
         NSLayoutConstraint.activate([
             shareButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
-            shareButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: -16),
+            shareButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
             shareButton.widthAnchor.constraint(equalToConstant: 32),
             shareButton.heightAnchor.constraint(equalToConstant: 32)
         ])
