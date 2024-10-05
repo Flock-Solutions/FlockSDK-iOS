@@ -19,6 +19,7 @@ public class Flock: NSObject {
     private let publicAccessKey: String
     private let campaignId: String
     private let apiClient: APIClient
+    private var webViewController: WebViewController?
     
     private init(publicAccessKey: String, campaignId: String, overrideApiURL: String? = nil) {
         self.publicAccessKey = publicAccessKey
@@ -50,6 +51,7 @@ public class Flock: NSObject {
         isInitialized = true
         
         flock?.ping()
+        flock?.webViewController = WebViewController(url: URL(string: "http://localhost:4200/referrals/AWD43SZ")!)
         
         return shared
     }
@@ -85,9 +87,7 @@ public class Flock: NSObject {
      Open Referral Page
      */
     public func openReferralView(style: WebViewPresentationStyle? = .fullscreen) {
-        let webViewController = WebViewController(url: URL(string: "http://localhost:4200/referrals/AWD43SZ")!)
-                
-        if let topViewController = UIApplication.shared.topMostViewController() {
+        if let webViewController = self.webViewController, let topViewController = UIApplication.shared.topMostViewController() {
             if style == .modal {
                 topViewController.present(webViewController, animated: true, completion: nil)
             } else if let navigationController = topViewController.navigationController {
