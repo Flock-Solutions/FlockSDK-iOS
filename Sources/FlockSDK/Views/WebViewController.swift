@@ -36,12 +36,12 @@ class WebViewController: UIViewController, WKNavigationDelegate {
         if let webView = webView, let closeButton = closeButton, let shareButton = shareButton, let progressView = progressView {
             view.addSubview(webView)
             view.addSubview(closeButton)
-            view.addSubview(shareButton)
+//            view.addSubview(shareButton)
             view.addSubview(progressView)
             
             positionWebView()
             positionCloseButton()
-            positionShareButton()
+//            positionShareButton()
             positionProgressView()
         }
     }
