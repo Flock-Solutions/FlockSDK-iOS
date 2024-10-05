@@ -102,7 +102,7 @@ public class Flock: NSObject {
                       let selectedNavController = tabBarController.selectedViewController as? UINavigationController {
                 selectedNavController.pushViewController(webViewController, animated: true)
             } else {
-                webViewController.modalPresentationStyle = .fullScreen
+                webViewController.modalPresentationStyle = .overFullScreen
                 topViewController.present(webViewController, animated: true, completion: nil)
             }
         }
