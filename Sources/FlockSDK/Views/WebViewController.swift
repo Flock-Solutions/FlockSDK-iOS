@@ -55,6 +55,7 @@ class WebViewController: UIViewController, WKNavigationDelegate {
     
     private func loadWebView() {
         if let webView = webView {
+            webView.frame = view.bounds
             view.addSubview(webView)
             NSLayoutConstraint.activate([
                 webView.topAnchor.constraint(equalTo: view.topAnchor),
