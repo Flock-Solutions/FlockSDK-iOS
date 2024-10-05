@@ -19,19 +19,18 @@ class WebViewController: UIViewController, WKNavigationDelegate {
     init(url: URL) {
         self.url = url
         super.init(nibName: nil, bundle: nil)
-        self.loadWebView()
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func loadWebView() {
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
         setupWebView()
         setupCloseButton()
         setupProgressView()
-        
-        webView.load(URLRequest(url: url))
     }
     
     private func setupWebView() {
@@ -40,6 +39,7 @@ class WebViewController: UIViewController, WKNavigationDelegate {
         webView.navigationDelegate = self
         webView.allowsBackForwardNavigationGestures = true
         webView.translatesAutoresizingMaskIntoConstraints = false
+        webView.load(URLRequest(url: url))
         view.addSubview(webView)
         
         NSLayoutConstraint.activate([
