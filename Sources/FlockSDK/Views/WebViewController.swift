@@ -38,9 +38,17 @@ class WebViewController: UIViewController, WKNavigationDelegate {
             view.addSubview(closeButton)
             view.addSubview(shareButton)
             view.addSubview(progressView)
+            
+            positionWebView()
+            positionCloseButton()
+            positionShareButton()
+            positionProgressView()
         }
     }
     
+    /*
+     WEB VIEW
+     */
     private func setupWebView() -> WKWebView {
         let webConfiguration = WKWebViewConfiguration()
         let webView = WKWebView(frame: view.bounds, configuration: webConfiguration)
@@ -49,16 +57,23 @@ class WebViewController: UIViewController, WKNavigationDelegate {
         webView.translatesAutoresizingMaskIntoConstraints = false
         webView.load(URLRequest(url: url))
         
-        NSLayoutConstraint.activate([
-            webView.topAnchor.constraint(equalTo: view.topAnchor),
-            webView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            webView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            webView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-        ])
-        
         return webView
     }
     
+    private func positionWebView() {
+        if let webView = webView {
+            NSLayoutConstraint.activate([
+                webView.topAnchor.constraint(equalTo: view.topAnchor),
+                webView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+                webView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+                webView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+            ])
+        }
+    }
+    
+    /**
+     BUTTONS
+     */
     private func setupCloseButton() -> UIButton {
         let closeButton = UIButton(type: .roundedRect)
         closeButton.setTitle("✕", for: .normal)
@@ -71,49 +86,64 @@ class WebViewController: UIViewController, WKNavigationDelegate {
         closeButton.addTarget(self, action: #selector(closeTapped), for: .touchUpInside)
         closeButton.translatesAutoresizingMaskIntoConstraints = false
         
-        NSLayoutConstraint.activate([
-            closeButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
-            closeButton.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
-            closeButton.widthAnchor.constraint(equalToConstant: 32),
-            closeButton.heightAnchor.constraint(equalToConstant: 32)
-        ])
-        
         return closeButton
+    }
+    
+    private func positionCloseButton() {
+        if  let closeButton = closeButton {
+            NSLayoutConstraint.activate([
+                closeButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
+                closeButton.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
+                closeButton.widthAnchor.constraint(equalToConstant: 32),
+                closeButton.heightAnchor.constraint(equalToConstant: 32)
+            ])
+        }
     }
     
     private func setupShareButton() -> UIButton {
-        let closeButton = UIButton(type: .roundedRect)
+        let shareButton = UIButton(type: .roundedRect)
         let image = UIImage(named: "share-icon", in: .module, with: nil)
-        closeButton.setImage(image, for: .normal)
-        closeButton.tintColor = .white
-        closeButton.clipsToBounds = true
-        closeButton.layer.cornerRadius = 16
-        closeButton.backgroundColor = UIColor.black.withAlphaComponent(0.6)
-        closeButton.setTitleColor(.white, for: .normal)
-        closeButton.addTarget(self, action: #selector(closeTapped), for: .touchUpInside)
-        closeButton.translatesAutoresizingMaskIntoConstraints = false
+        shareButton.setImage(image, for: .normal)
+        shareButton.tintColor = .white
+        shareButton.clipsToBounds = true
+        shareButton.layer.cornerRadius = 16
+        shareButton.backgroundColor = UIColor.black.withAlphaComponent(0.6)
+        shareButton.setTitleColor(.white, for: .normal)
+        shareButton.addTarget(self, action: #selector(closeTapped), for: .touchUpInside)
+        shareButton.translatesAutoresizingMaskIntoConstraints = false
         
-        NSLayoutConstraint.activate([
-            closeButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
-            closeButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: -16),
-            closeButton.widthAnchor.constraint(equalToConstant: 32),
-            closeButton.heightAnchor.constraint(equalToConstant: 32)
-        ])
-        
-        return closeButton
+        return shareButton
     }
     
+    private func positionShareButton() {
+        if let shareButton = shareButton {
+            NSLayoutConstraint.activate([
+                shareButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
+                shareButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: -16),
+                shareButton.widthAnchor.constraint(equalToConstant: 32),
+                shareButton.heightAnchor.constraint(equalToConstant: 32)
+            ])
+        }
+    }
+    
+    /**
+     PROGRESS BAR
+     */
     private func setupProgressView() -> UIProgressView {
         let progressView = UIProgressView(progressViewStyle: .default)
         progressView.translatesAutoresizingMaskIntoConstraints = false
-        
-        NSLayoutConstraint.activate([
-            progressView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            progressView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            progressView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-        ])
-        
+    
         return progressView
+    }
+    
+    private func positionProgressView() {
+        if let progressView = progressView {
+            NSLayoutConstraint.activate([
+                progressView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+                progressView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+                progressView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            ])
+        }
     }
     
     @objc func closeTapped() {
