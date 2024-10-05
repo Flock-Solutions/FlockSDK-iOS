@@ -33,6 +33,7 @@ class WebViewController: UIViewController, WKNavigationDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        self.view.backgroundColor = .black
         setupWebView()
         setupCloseButton()
         setupShareButton()
