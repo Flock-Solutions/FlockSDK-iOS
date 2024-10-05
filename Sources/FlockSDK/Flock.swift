@@ -76,11 +76,13 @@ public class Flock: NSObject {
         Task {
             do {
                 let identifyRequest = IdentifyRequest(externalUserId: externalUserId, email: email, name: name, campaignId: self.campaignId)
-                let customer = try await self.apiClient.identify(identifyRequest: identifyRequest)
-                self.customer = customer
+                customer = try await self.apiClient.identify(identifyRequest: identifyRequest)
                 
                 // Preload Referral page
-                self.webViewController = WebViewController(url: getReferURL(for: customer))
+                if let customer = customer {
+                    webViewController = WebViewController(url: getReferURL(for: customer))
+                    webViewController?.loadViewIfNeeded()
+                }
             } catch {
                 Flock.logger.error("Error identifying customer: \(error)")
             }

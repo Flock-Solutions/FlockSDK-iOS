@@ -20,10 +20,6 @@ class WebViewController: UIViewController, WKNavigationDelegate {
     init(url: URL) {
         self.url = url
         super.init(nibName: nil, bundle: nil)
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            self.preloadWebView()
-        }
     }
     
     required init?(coder: NSCoder) {
@@ -39,13 +35,10 @@ class WebViewController: UIViewController, WKNavigationDelegate {
         setupProgressView()
     }
     
-    private func preloadWebView() {
+    private func setupWebView() {
         let configuration = WKWebViewConfiguration()
         webView = WKWebView(frame: view.bounds, configuration: configuration)
         webView.load(URLRequest(url: url))
-    }
-    
-    private func setupWebView() {
         webView.frame = view.bounds
         webView.backgroundColor = .black
         webView.navigationDelegate = self
