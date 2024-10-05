@@ -20,6 +20,10 @@ class WebViewController: UIViewController, WKNavigationDelegate {
     init(url: URL) {
         self.url = url
         super.init(nibName: nil, bundle: nil)
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+            self.preloadWebView()
+        }
     }
     
     required init?(coder: NSCoder) {
@@ -35,10 +39,12 @@ class WebViewController: UIViewController, WKNavigationDelegate {
         setupProgressView()
     }
     
-    private func setupWebView() {
-        let configuration = WKWebViewConfiguration()
-        webView = WKWebView(frame: view.bounds, configuration: configuration)
+    private func preloadWebView() {
+        webView = WKWebView()
         webView.load(URLRequest(url: url))
+    }
+    
+    private func setupWebView() {
         webView.frame = view.bounds
         webView.backgroundColor = .black
         webView.navigationDelegate = self
@@ -78,6 +84,7 @@ class WebViewController: UIViewController, WKNavigationDelegate {
     private func setupShareButton() {
         shareButton = UIButton(type: .roundedRect)
         shareButton.setImage(UIImage(named: "share-icon", in: .module, with: nil), for: .normal)
+        shareButton.imageEdgeInsets = UIEdgeInsets(top: 4, left: 4, bottom: 4, right: 4)
         shareButton.tintColor = .white
         shareButton.clipsToBounds = true
         shareButton.layer.cornerRadius = 16
