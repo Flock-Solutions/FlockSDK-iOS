@@ -33,17 +33,10 @@ class WebViewController: UIViewController, WKNavigationDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        if let webView = webView, let closeButton = closeButton, let shareButton = shareButton, let progressView = progressView {
-            view.addSubview(webView)
-            view.addSubview(closeButton)
-//            view.addSubview(shareButton)
-            view.addSubview(progressView)
-            
-            positionWebView()
-            positionCloseButton()
-//            positionShareButton()
-            positionProgressView()
-        }
+        displayWebView()
+        displayCloseButton()
+        dislayShareButton()
+        displayProgressView()
     }
     
     /*
@@ -60,8 +53,9 @@ class WebViewController: UIViewController, WKNavigationDelegate {
         return webView
     }
     
-    private func positionWebView() {
+    private func displayWebView() {
         if let webView = webView {
+            view.addSubview(webView)
             NSLayoutConstraint.activate([
                 webView.topAnchor.constraint(equalTo: view.topAnchor),
                 webView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
@@ -89,8 +83,9 @@ class WebViewController: UIViewController, WKNavigationDelegate {
         return closeButton
     }
     
-    private func positionCloseButton() {
+    private func displayCloseButton() {
         if  let closeButton = closeButton {
+            view.addSubview(closeButton)
             NSLayoutConstraint.activate([
                 closeButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
                 closeButton.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
@@ -115,8 +110,9 @@ class WebViewController: UIViewController, WKNavigationDelegate {
         return shareButton
     }
     
-    private func positionShareButton() {
+    private func dislayShareButton() {
         if let shareButton = shareButton {
+            view.addSubview(shareButton)
             NSLayoutConstraint.activate([
                 shareButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
                 shareButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: -16),
@@ -136,8 +132,9 @@ class WebViewController: UIViewController, WKNavigationDelegate {
         return progressView
     }
     
-    private func positionProgressView() {
+    private func displayProgressView() {
         if let progressView = progressView {
+            view.addSubview(progressView)
             NSLayoutConstraint.activate([
                 progressView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
                 progressView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
