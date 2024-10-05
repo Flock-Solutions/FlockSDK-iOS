@@ -33,7 +33,6 @@ class WebViewController: UIViewController, WKNavigationDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        self.view.backgroundColor = .black
         setupWebView()
         setupCloseButton()
         setupShareButton()
@@ -41,7 +40,8 @@ class WebViewController: UIViewController, WKNavigationDelegate {
     }
     
     private func preloadWebView() {
-        webView = WKWebView()
+        let configuration = WKWebViewConfiguration()
+        webView = WKWebView(frame: view.bounds, configuration: configuration)
         webView.load(URLRequest(url: url))
     }
     
