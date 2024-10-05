@@ -10,17 +10,20 @@ import WebKit
 
 @available(iOS 13.0, *)
 class WebViewController: UIViewController, WKNavigationDelegate {
-    private var webView: WKWebView!
     private let url: URL
-    private var closeButton: UIButton!
-    private var progressView: UIProgressView!
+    private var webView: WKWebView?
+    private var closeButton: UIButton?
+    private var shareButton: UIButton?
+    private var progressView: UIProgressView?
     private var progressObservation: NSKeyValueObservation?
     
     init(url: URL) {
         self.url = url
         super.init(nibName: nil, bundle: nil)
-        
-        setupWebView()
+        webView = setupWebView()
+        closeButton = setupCloseButton()
+        progressView = setupProgressView()
+        shareButton = setupShareButton()
     }
     
     required init?(coder: NSCoder) {
@@ -30,14 +33,17 @@ class WebViewController: UIViewController, WKNavigationDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        view.addSubview(webView)
-        setupCloseButton()
-        setupProgressView()
+        if let webView = webView, let closeButton = closeButton, let progressView = progressView {
+            view.addSubview(webView)
+            view.addSubview(closeButton)
+            view.addSubview(shareButton)
+            view.addSubview(progressView)
+        }
     }
     
-    private func setupWebView() {
+    private func setupWebView() -> WKWebView {
         let webConfiguration = WKWebViewConfiguration()
-        webView = WKWebView(frame: view.bounds, configuration: webConfiguration)
+        let webView = WKWebView(frame: view.bounds, configuration: webConfiguration)
         webView.navigationDelegate = self
         webView.allowsBackForwardNavigationGestures = true
         webView.translatesAutoresizingMaskIntoConstraints = false
@@ -49,10 +55,12 @@ class WebViewController: UIViewController, WKNavigationDelegate {
             webView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             webView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
+        
+        return webView
     }
     
-    private func setupCloseButton() {
-        closeButton = UIButton(type: .roundedRect)
+    private func setupCloseButton() -> UIButton {
+        let closeButton = UIButton(type: .roundedRect)
         closeButton.setTitle("✕", for: .normal)
         closeButton.titleLabel?.font = UIFont.systemFont(ofSize: 20)
         closeButton.setTitleColor(.white, for: .normal)
@@ -62,7 +70,6 @@ class WebViewController: UIViewController, WKNavigationDelegate {
         closeButton.setTitleColor(.white, for: .normal)
         closeButton.addTarget(self, action: #selector(closeTapped), for: .touchUpInside)
         closeButton.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(closeButton)
         
         NSLayoutConstraint.activate([
             closeButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
@@ -70,18 +77,43 @@ class WebViewController: UIViewController, WKNavigationDelegate {
             closeButton.widthAnchor.constraint(equalToConstant: 32),
             closeButton.heightAnchor.constraint(equalToConstant: 32)
         ])
+        
+        return closeButton
     }
     
-    private func setupProgressView() {
-        progressView = UIProgressView(progressViewStyle: .default)
+    private func setupShareButton() -> UIButton {
+        let closeButton = UIButton(type: .roundedRect)
+        let image = UIImage(named: "share-icon", in: .module, with: nil)
+        closeButton.setImage(image, for: .normal)
+        closeButton.tintColor = .white
+        closeButton.clipsToBounds = true
+        closeButton.layer.cornerRadius = 16
+        closeButton.backgroundColor = UIColor.black.withAlphaComponent(0.6)
+        closeButton.setTitleColor(.white, for: .normal)
+        closeButton.addTarget(self, action: #selector(closeTapped), for: .touchUpInside)
+        closeButton.translatesAutoresizingMaskIntoConstraints = false
+        
+        NSLayoutConstraint.activate([
+            closeButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
+            closeButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: -16),
+            closeButton.widthAnchor.constraint(equalToConstant: 32),
+            closeButton.heightAnchor.constraint(equalToConstant: 32)
+        ])
+        
+        return closeButton
+    }
+    
+    private func setupProgressView() -> UIProgressView {
+        let progressView = UIProgressView(progressViewStyle: .default)
         progressView.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(progressView)
         
         NSLayoutConstraint.activate([
             progressView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             progressView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             progressView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
         ])
+        
+        return progressView
     }
     
     @objc func closeTapped() {
@@ -90,11 +122,6 @@ class WebViewController: UIViewController, WKNavigationDelegate {
         } else {
             dismiss(animated: true, completion: nil)
         }
-    }
-    
-    private func updateProgress() {
-        progressView.progress = Float(webView.estimatedProgress)
-        progressView.isHidden = webView.estimatedProgress == 1
     }
     
     deinit {

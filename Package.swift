@@ -18,7 +18,10 @@ let package = Package(
         .target(
             name: "FlockSDK",
             dependencies: [],
-            path: "Sources"
+            path: "Sources",
+            resources: [
+                .process("Resources/Media.xcassets")
+            ]
         ),
         .testTarget(
             name: "FlockSDKTests",
