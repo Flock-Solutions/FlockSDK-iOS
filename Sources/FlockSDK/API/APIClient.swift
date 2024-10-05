@@ -33,7 +33,7 @@ struct APIClient {
     }
     
     @discardableResult
-    func identify(identifyRequest: IdentifyRequest) async throws -> IdentifyResponse {
+    func identify(identifyRequest: IdentifyRequest) async throws -> Customer {
         let url = try self.urlBuilder.build(path: "/customers/identify")
 
         let request = self.requestBuilder.build(url: url, method: .post)
@@ -46,7 +46,7 @@ struct APIClient {
             throw URLError(.badServerResponse)
         }
         
-        let json = try JSONDecoder().decode(IdentifyResponse.self, from: data)
+        let json = try JSONDecoder().decode(Customer.self, from: data)
         return json
     }
 }

@@ -20,6 +20,7 @@ public class Flock: NSObject {
     private let campaignId: String
     private let apiClient: APIClient
     private var webViewController: WebViewController?
+    private var customer: Customer?
     
     private init(publicAccessKey: String, campaignId: String, overrideApiURL: String? = nil) {
         self.publicAccessKey = publicAccessKey
@@ -51,7 +52,6 @@ public class Flock: NSObject {
         isInitialized = true
         
         flock?.ping()
-        flock?.webViewController = WebViewController(url: URL(string: "http://localhost:4200/referrals/AWD43SZ")!)
         
         return shared
     }
@@ -76,7 +76,11 @@ public class Flock: NSObject {
         Task {
             do {
                 let identifyRequest = IdentifyRequest(externalUserId: externalUserId, email: email, name: name, campaignId: self.campaignId)
-                try await self.apiClient.identify(identifyRequest: identifyRequest)
+                let customer = try await self.apiClient.identify(identifyRequest: identifyRequest)
+                self.customer = customer
+                
+                // Preload Referral page
+                self.webViewController = WebViewController(url: getReferURL(for: customer))
             } catch {
                 Flock.logger.error("Error identifying customer: \(error)")
             }
@@ -100,5 +104,14 @@ public class Flock: NSObject {
                 topViewController.present(webViewController, animated: true, completion: nil)
             }
         }
+    }
+    
+    private func getReferURL(for customer: Customer) -> URL {
+        let queryItems = [URLQueryItem(name: "customer_id", value: customer.id), URLQueryItem(name: "key", value: self.publicAccessKey)]
+        
+        var urlComps = URLComponents(string: "http://localhost:4200/refer")!
+        urlComps.queryItems = queryItems
+        
+        return urlComps.url!
     }
 }

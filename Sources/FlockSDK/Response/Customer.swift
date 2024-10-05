@@ -4,7 +4,7 @@
 //
 //  Created by Hoa Nguyen on 2024-10-02.
 //
-public struct IdentifyResponse: Codable, Sendable {
+public struct Customer: Codable, Sendable {
     let id: String
     let externalUserId: String
     let email: String
