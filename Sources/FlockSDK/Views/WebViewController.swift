@@ -80,7 +80,7 @@ class WebViewController: UIViewController, WKNavigationDelegate {
         #if SWIFT_PACKAGE
             let bundle = Bundle.module
         #else
-            let bundle = Bundle(for: self)
+            let bundle = Bundle(for: WebViewController.self)
         #endif
         shareButton.setImage(UIImage(named: "share-icon", in: bundle, with: nil), for: .normal)
         shareButton.imageEdgeInsets = UIEdgeInsets(top: 5, left: 5, bottom: 5, right: 5)
