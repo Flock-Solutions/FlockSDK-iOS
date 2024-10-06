@@ -27,6 +27,7 @@ extension UIViewController {
 
 extension UIApplication {
     func topMostViewController() -> UIViewController? {
-        return self.keyWindow?.rootViewController?.topMostViewController()
+        let keyWindow = UIApplication.shared.windows.filter {$0.isKeyWindow}.first
+        return keyWindow?.rootViewController?.topMostViewController()
     }
 }

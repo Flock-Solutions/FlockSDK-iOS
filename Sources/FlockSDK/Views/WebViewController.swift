@@ -77,7 +77,12 @@ class WebViewController: UIViewController, WKNavigationDelegate {
     
     private func setupShareButton() {
         shareButton = UIButton(type: .roundedRect)
-        shareButton.setImage(UIImage(named: "share-icon", in: .module, with: nil), for: .normal)
+        #if SWIFT_PACKAGE
+            let bundle = Bundle.module
+        #else
+            let bundle = Bundle(for: self)
+        #endif
+        shareButton.setImage(UIImage(named: "share-icon", in: bundle, with: nil), for: .normal)
         shareButton.imageEdgeInsets = UIEdgeInsets(top: 5, left: 5, bottom: 5, right: 5)
         shareButton.tintColor = .white
         shareButton.clipsToBounds = true

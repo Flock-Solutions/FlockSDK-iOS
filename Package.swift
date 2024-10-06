@@ -20,7 +20,7 @@ let package = Package(
             dependencies: [],
             path: "Sources",
             resources: [
-                .process("Resources/Media.xcassets")
+                .process("Resources")
             ]
         ),
         .testTarget(

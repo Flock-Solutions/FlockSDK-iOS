@@ -63,8 +63,7 @@ Pod::Spec.new do |spec|
   #  the deployment target. You can optionally include the target after the platform.
   #
 
-  # spec.platform     = :ios
-  # spec.platform     = :ios, "5.0"
+  spec.platform     = :ios, "13.0"
 
   #  When using multiple platforms
   # spec.ios.deployment_target = "5.0"
@@ -80,7 +79,7 @@ Pod::Spec.new do |spec|
   #  Supports git, hg, bzr, svn and HTTP.
   #
 
-  spec.source       = { :git => "https://github.com/hoadnguyen/FlockSDK-iOS.git", :tag => "0.0.1" }
+  spec.source       = { :git => "https://github.com/hoadnguyen/FlockSDK-iOS.git", :tag => "0.0.2" }
 
 
   # ――― Source Code ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――― #
@@ -91,8 +90,8 @@ Pod::Spec.new do |spec|
   #  Not including the public_header_files will make all headers public.
   #
 
-  spec.source_files  = "Classes", "Classes/**/*.{h,m}"
-  spec.exclude_files = "Classes/Exclude"
+  spec.source_files  = "Sources", "Sources/**/*.{swift,h,m}"
+  spec.exclude_files = "Sources/Exclude"
 
   # spec.public_header_files = "Classes/**/*.h"
 
@@ -107,6 +106,7 @@ Pod::Spec.new do |spec|
 
   # spec.resource  = "icon.png"
   # spec.resources = "Resources/*.png"
+  spec.resource_bundles = { 'FlockSDK' => ['Sources/**/*.{xcassets}'] }
 
   # spec.preserve_paths = "FilesToSave", "MoreFilesToSave"
 
