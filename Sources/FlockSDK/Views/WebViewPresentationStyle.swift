@@ -6,6 +6,6 @@
 //
 
 public enum WebViewPresentationStyle {
-    case modal
-    case fullscreen
+  case modal
+  case fullscreen
 }

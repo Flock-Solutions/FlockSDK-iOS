@@ -6,18 +6,18 @@
 //
 import Foundation
 
-internal struct URLBuilder {
-    private let baseURL: URL?
-    
-    init(baseURL: String? = nil) {
-        self.baseURL = URL(string: baseURL ?? "https://api.withflock.com")
+struct URLBuilder {
+  private let baseURL: URL?
+
+  init(baseURL: String? = nil) {
+    self.baseURL = URL(string: baseURL ?? "https://api.withflock.com")
+  }
+
+  func build(path: String) throws -> URL {
+    guard baseURL != nil, let url = URL(string: path, relativeTo: baseURL) else {
+      throw URLError(.badURL)
     }
-    
-    func build(path: String) throws -> URL {
-        guard self.baseURL != nil, let url = URL(string: path, relativeTo: self.baseURL) else {
-            throw URLError(.badURL)
-        }
-        
-        return url
-    }
+
+    return url
+  }
 }

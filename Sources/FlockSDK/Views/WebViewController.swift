@@ -8,89 +8,91 @@
 import WebKit
 
 @available(iOS 13.0, *)
-internal class WebViewController: UIViewController, WKNavigationDelegate, WKScriptMessageHandler {
-    private var webView: WKWebView!
-    private let url: URL
-    private let backgroundColorHex: String?
-    
-    var onClose: (() -> Void)?
-    var onSuccess: (() -> Void)?
-    var onInvalid: (() -> Void)?
+class WebViewController: UIViewController, WKNavigationDelegate, WKScriptMessageHandler {
+  private var webView: WKWebView!
+  private let url: URL
+  private let backgroundColorHex: String?
 
-    init(
-        url: URL,
-        backgroundColorHex: String? = nil,
-        onClose: (() -> Void)? = nil,
-        onSuccess: (() -> Void)? = nil,
-        onInvalid: (() -> Void)? = nil
-    ) {
-        self.url = url
-        self.backgroundColorHex = backgroundColorHex
-        self.onClose = onClose
-        self.onSuccess = onSuccess
-        self.onInvalid = onInvalid
-        super.init(nibName: nil, bundle: nil)
-    }
-    
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-    
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        
-        if let hex = backgroundColorHex, let color = UIColor(hex: hex) {
-            view.backgroundColor = color
-        }
-        
-        setupWebView()
-    }
-    
-    private func setupWebView() {
-        let configuration = WKWebViewConfiguration()
-        configuration.userContentController.add(self, name: "ReactNativeWebView")
-        webView = WKWebView(frame: view.bounds, configuration: configuration)
-        webView.load(URLRequest(url: url))
-        webView.frame = view.bounds
-        webView.backgroundColor = .black
-        webView.navigationDelegate = self
-        webView.allowsBackForwardNavigationGestures = false
-        webView.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(webView)
-        
-        NSLayoutConstraint.activate([
-            webView.topAnchor.constraint(equalTo: view.topAnchor),
-            webView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            webView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            webView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-        ])
+  var onClose: (() -> Void)?
+  var onSuccess: (() -> Void)?
+  var onInvalid: (() -> Void)?
+
+  init(
+    url: URL,
+    backgroundColorHex: String? = nil,
+    onClose: (() -> Void)? = nil,
+    onSuccess: (() -> Void)? = nil,
+    onInvalid: (() -> Void)? = nil
+  ) {
+    self.url = url
+    self.backgroundColorHex = backgroundColorHex
+    self.onClose = onClose
+    self.onSuccess = onSuccess
+    self.onInvalid = onInvalid
+    super.init(nibName: nil, bundle: nil)
+  }
+
+  @available(*, unavailable)
+  required init?(coder _: NSCoder) {
+    fatalError("init(coder:) has not been implemented")
+  }
+
+  override func viewDidLoad() {
+    super.viewDidLoad()
+
+    if let hex = backgroundColorHex, let color = UIColor(hex: hex) {
+      view.backgroundColor = color
     }
 
-    func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
-        guard message.name == "ReactNativeWebView",
-              let body = message.body as? String,
-              let data = body.data(using: .utf8),
-              let obj = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-              let event = obj["event"] as? String else {
-            return
-        }
-        switch event {
-        case "close":
-            self.dismiss(animated: true)
-            self.onClose?()
-        case "success":
-            self.onSuccess?()
-        case "invalid":
-            self.onInvalid?()
-        default:
-            break
-        }
-    }
+    setupWebView()
+  }
 
-    deinit {
-        let webView = self.webView
-        Task { @MainActor in
-            webView?.configuration.userContentController.removeScriptMessageHandler(forName: "ReactNativeWebView")
-        }
+  private func setupWebView() {
+    let configuration = WKWebViewConfiguration()
+    configuration.userContentController.add(self, name: "ReactNativeWebView")
+    webView = WKWebView(frame: view.bounds, configuration: configuration)
+    webView.load(URLRequest(url: url))
+    webView.frame = view.bounds
+    webView.backgroundColor = .black
+    webView.navigationDelegate = self
+    webView.allowsBackForwardNavigationGestures = false
+    webView.translatesAutoresizingMaskIntoConstraints = false
+    view.addSubview(webView)
+
+    NSLayoutConstraint.activate([
+      webView.topAnchor.constraint(equalTo: view.topAnchor),
+      webView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+      webView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+      webView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+    ])
+  }
+
+  func userContentController(_: WKUserContentController, didReceive message: WKScriptMessage) {
+    guard message.name == "ReactNativeWebView",
+          let body = message.body as? String,
+          let data = body.data(using: .utf8),
+          let obj = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+          let event = obj["event"] as? String
+    else {
+      return
     }
+    switch event {
+    case "close":
+      dismiss(animated: true)
+      onClose?()
+    case "success":
+      onSuccess?()
+    case "invalid":
+      onInvalid?()
+    default:
+      break
+    }
+  }
+
+  deinit {
+    let webView = self.webView
+    Task { @MainActor in
+      webView?.configuration.userContentController.removeScriptMessageHandler(forName: "ReactNativeWebView")
+    }
+  }
 }

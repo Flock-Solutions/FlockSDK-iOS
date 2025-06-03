@@ -1,0 +1,12 @@
+disabled_rules:
+  - line_length
+  - trailing_whitespace
+
+opt_in_rules:
+  - attributes
+  - closure_spacing
+
+included:
+  - Sources
+  - Tests
+

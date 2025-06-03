@@ -6,5 +6,5 @@
 //
 
 public struct PingResponse: Codable, Sendable {
-    let id: String
+  let id: String
 }
