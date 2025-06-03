@@ -29,11 +29,11 @@ public class Flock: NSObject {
     customerService = CustomerService(publicAccessKey: self.publicAccessKey, baseURL: overrideApiURL)
   }
 
-  public static func shared() throws -> Flock {
+  public static func shared() -> Flock? {
     guard let flock else {
       logger.warning("FlockSDK has not been initialized. Please call FlockSDK.initialized()")
       assertionFailure("FlockSDK has not been initialized. Please call FlockSDK.initialized()")
-      throw FlockSDKErrors.uninitialized("FlockSDK has not been initialized. Please call FlockSDK.initialized()")
+      return nil
     }
     return flock
   }
@@ -82,8 +82,6 @@ public class Flock: NSObject {
       - externalUserId: The unique identifier for the user in your system.
       - email: The customer's email address.
       - name: The customer's name (optional).
-
-   - Throws: `FlockSDKErrors.uninitialized` if SDK is not initialized.
    */
   public func identify(externalUserId: String, email: String, name: String?) {
     guard isInitialized else {
@@ -111,8 +109,6 @@ public class Flock: NSObject {
       - onClose: Callback executed when the page is closed.
       - onSuccess: Callback executed when the page reports a success event.
       - onInvalid: Callback executed when the page reports an invalid event.
-
-   - Throws: `FlockSDKErrors.uninitialized` if SDK is not initialized.
    */
   public func openPage(
     type: String,
