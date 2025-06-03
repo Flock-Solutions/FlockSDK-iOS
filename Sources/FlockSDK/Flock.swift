@@ -14,75 +14,90 @@ public class Flock: NSObject {
         category: String(describing: Flock.self)
     )
     
-    public private(set) static var isInitialized = false
+    private(set) var isInitialized = false
     
     private let publicAccessKey: String
-    private let campaignId: String
-    private let apiClient: APIClient
-    private var webViewController: WebViewController?
+    private let environment: FlockEnvironment
+    private var campaign: Campaign?
     private var customer: Customer?
     
-    private init(publicAccessKey: String, campaignId: String, overrideApiURL: String? = nil) {
+    private let campaignService: CampaignService
+    private let customerService: CustomerService
+    
+    private init(publicAccessKey: String, environment: FlockEnvironment, overrideApiURL: String? = nil) {
         self.publicAccessKey = publicAccessKey
-        self.campaignId = campaignId
-        self.apiClient = APIClient(apiKey: self.publicAccessKey, baseURL: overrideApiURL)
+        self.environment = environment
+        self.campaignService = CampaignService(publicAccessKey: self.publicAccessKey, baseURL: overrideApiURL)
+        self.customerService = CustomerService(publicAccessKey: self.publicAccessKey, baseURL: overrideApiURL)
     }
     
-    public static var shared: Flock {
+    public static func shared() throws -> Flock {
         guard let flock = flock else {
-            logger.warning("FlockSDK has not been configured. Please call FlockSDK.configure()")
-            assertionFailure("FlockSDK has not been configured. Please call FlockSDK.configure()")
-            return Flock(publicAccessKey: "", campaignId: "")
+            logger.warning("FlockSDK has not been initialized. Please call FlockSDK.initialized()")
+            assertionFailure("FlockSDK has not been initialized. Please call FlockSDK.initialized()")
+            throw FlockSDKErrors.uninitialized("FlockSDK has not been initialized. Please call FlockSDK.initialized()")
         }
         return flock
     }
     
     @discardableResult
-    public static func configure(
+    public static func initialize(
         publicAccessKey: String,
-        campaignId: String,
+        environment: FlockEnvironment,
         overrideApiURL: String? = nil
-    ) -> Flock {
+    ) throws -> Flock {
         guard flock == nil else {
-            logger.warning("FlockSDK has already been configured. Please call FlockSDK.configure() only once")
-            return shared
+            logger.warning("FlockSDK has already been initialized. Please call FlockSDK.initialized() only once")
+            throw FlockSDKErrors.uninitialized("FlockSDK has already been initialized. Please call FlockSDK.initialized() only once")
         }
         
-        flock = Flock(publicAccessKey: publicAccessKey, campaignId: campaignId, overrideApiURL: overrideApiURL)
-        isInitialized = true
+        let instance = Flock(publicAccessKey: publicAccessKey, environment: environment, overrideApiURL: overrideApiURL)
+        flock = instance
         
-        flock?.ping()
-        
-        return shared
-    }
-    
-    /**
-     Ping the server to make sure the integration is working
-     */
-    public func ping() -> Void {
-        Task {
+        // Fetch live campaign from Flock
+        Task { @MainActor in
+            var campaign: Campaign? = nil
             do {
-                try await self.apiClient.ping(campaignId: self.campaignId)
+                campaign = try await instance.campaignService.getLiveCampaign(environment: environment)
+                instance.campaign = campaign
             } catch {
-                Flock.logger.error("Error pinging server: \(error)")
+                logger.error("Error fetching live campaign during initialization: \(error)")
+            }
+            
+            guard let campaign = campaign else { return }
+            do {
+                try await instance.campaignService.ping(campaignId: campaign.id)
+            } catch {
+                logger.error("Error pinging campaign during initialization: \(error)")
             }
         }
+        
+        instance.isInitialized = true
+        
+        return instance
     }
     
+    
     /**
-     Identify customers to keep a record in Flock
+     Identifies a customer to keep a record in Flock.
+
+     - Parameters:
+        - externalUserId: The unique identifier for the user in your system.
+        - email: The customer's email address.
+        - name: The customer's name (optional).
+
+     - Throws: `FlockSDKErrors.uninitialized` if SDK is not initialized.
      */
-    public func identify(externalUserId: String, email: String, name: String?) -> Void {
+    public func identify(externalUserId: String, email: String, name: String?) throws -> Void {
+        guard isInitialized else {
+            throw FlockSDKErrors.uninitialized("FlockSDK is not initialized. Please call FlockSDK.initialize() first")
+        }
+        
         Task {
+            guard let campaign else { return }
             do {
-                let identifyRequest = IdentifyRequest(externalUserId: externalUserId, email: email, name: name, campaignId: self.campaignId)
-                customer = try await self.apiClient.identify(identifyRequest: identifyRequest)
-                
-                // Preload Referral page
-                if let customer = customer {
-                    webViewController = WebViewController(url: getReferURL(for: customer))
-                    webViewController?.loadViewIfNeeded()
-                }
+                let identifyRequest = IdentifyRequest(externalUserId: externalUserId, email: email, name: name, campaignId: campaign.id)
+                customer = try await customerService.identify(identifyRequest: identifyRequest)
             } catch {
                 Flock.logger.error("Error identifying customer: \(error)")
             }
@@ -90,30 +105,85 @@ public class Flock: NSObject {
     }
     
     /**
-     Open Referral Page
+     Opens a Flock web page in a modal or fullscreen style.
+
+     - Parameters:
+        - type: The page type or path to open
+        - style: Presentation style (.modal or .fullscreen). Default is .fullscreen.
+        - onClose: Callback executed when the page is closed.
+        - onSuccess: Callback executed when the page reports a success event.
+        - onInvalid: Callback executed when the page reports an invalid event.
+
+     - Throws: `FlockSDKErrors.uninitialized` if SDK is not initialized.
      */
-    public func openReferralView(style: WebViewPresentationStyle? = .fullscreen) {
-        if let webViewController = self.webViewController, let topViewController = UIApplication.shared.topMostViewController() {
-            if style == .modal {
-                topViewController.present(webViewController, animated: true, completion: nil)
-            } else if let navigationController = topViewController.navigationController {
-                navigationController.pushViewController(webViewController, animated: true)
-            } else if let tabBarController = topViewController as? UITabBarController,
-                      let selectedNavController = tabBarController.selectedViewController as? UINavigationController {
-                selectedNavController.pushViewController(webViewController, animated: true)
-            } else {
-                webViewController.modalPresentationStyle = .overFullScreen
-                topViewController.present(webViewController, animated: true, completion: nil)
-            }
+    public func openPage(
+        type: String,
+        style: WebViewPresentationStyle = .fullscreen,
+        onClose: (() -> Void)? = nil,
+        onSuccess: (() -> Void)? = nil,
+        onInvalid: (() -> Void)? = nil
+    ) throws {
+        guard isInitialized else {
+            throw FlockSDKErrors.uninitialized("FlockSDK is not initialized. Please call FlockSDK.initialize() first")
+        }
+        guard let url = buildWebPageURL(type: type) else {
+            Flock.logger.error("Cannot build web page URL for type: \(type)")
+            return
+        }
+        
+        let webViewController = WebViewController(
+            url: url,
+            onClose: onClose,
+            onSuccess: onSuccess,
+            onInvalid: onInvalid
+        )
+        
+        guard let topViewController = UIApplication.shared.topMostViewController(),
+              topViewController.presentedViewController == nil else { return }
+
+        switch style {
+        case .modal:
+            topViewController.present(webViewController, animated: true)
+        case .fullscreen:
+            webViewController.modalPresentationStyle = .overFullScreen
+            topViewController.present(webViewController, animated: true)
         }
     }
     
-    private func getReferURL(for customer: Customer) -> URL {
-        let queryItems = [URLQueryItem(name: "customer_id", value: customer.id), URLQueryItem(name: "key", value: self.publicAccessKey)]
+    private func buildWebPageURL(type: String) -> URL? {
+        // Split type into path and query
+        let parts = type.split(separator: "?", maxSplits: 1, omittingEmptySubsequences: false)
+        let path = String(parts.first ?? "")
+        let query = parts.count > 1 ? String(parts[1]) : ""
+
+        // Find the campaign page for this type
+        let campaignPage = campaign?.campaignPages.first { $0.path.contains(path) }
+
+        // Use backgroundColor if available
+        let backgroundColor = campaignPage?.screenProps?.backgroundColor
+
+        // Prepare base url
+        let appBaseURL = "https://app.withflock.com"
+
+        // Build URL string
+        var urlString = "\(appBaseURL)/pages/\(path)?key=\(publicAccessKey)"
         
-        var urlComps = URLComponents(string: "http://localhost:4200/refer")!
-        urlComps.queryItems = queryItems
+        if let campaignId = campaign?.id {
+            urlString += "&campaign_id=\(campaignId)"
+        }
         
-        return urlComps.url!
+        if let customerId = customer?.id {
+            urlString += "&customer_id=\(customerId)"
+        }
+        
+        if let backgroundColor = backgroundColor {
+            urlString += "&bg=\(backgroundColor)"
+        }
+        
+        if !query.isEmpty {
+            urlString += "&\(query)"
+        }
+
+        return URL(string: urlString)
     }
 }

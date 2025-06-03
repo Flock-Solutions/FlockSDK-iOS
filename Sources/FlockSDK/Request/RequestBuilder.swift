@@ -6,14 +6,14 @@
 //
 import Foundation
 
-enum RequestMethod: String {
+internal enum RequestMethod: String {
     case post = "POST"
     case get = "GET"
     case put = "PUT"
     case patch = "PATCH"
 }
 
-struct RequestBuilder {
+internal struct RequestBuilder {
     private let apiKey: String
     
     public init(apiKey: String) {

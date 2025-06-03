@@ -7,7 +7,7 @@
 
 import UIKit
 
-extension UIViewController {
+internal extension UIViewController {
     func topMostViewController() -> UIViewController? {
         if self.presentedViewController == nil {
             return self
@@ -25,7 +25,7 @@ extension UIViewController {
     }
 }
 
-extension UIApplication {
+internal extension UIApplication {
     func topMostViewController() -> UIViewController? {
         let keyWindow = UIApplication.shared.windows.filter {$0.isKeyWindow}.first
         return keyWindow?.rootViewController?.topMostViewController()

@@ -6,7 +6,7 @@
 //
 import Foundation
 
-struct URLBuilder {
+internal struct URLBuilder {
     private let baseURL: URL?
     
     init(baseURL: String? = nil) {

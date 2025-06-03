@@ -5,20 +5,30 @@
 //  Created by Hoa Nguyen on 2024-10-03.
 //
 
-import UIKit
 import WebKit
 
 @available(iOS 13.0, *)
-class WebViewController: UIViewController, WKNavigationDelegate {
+internal class WebViewController: UIViewController, WKNavigationDelegate, WKScriptMessageHandler {
     private var webView: WKWebView!
     private let url: URL
-    private var closeButton: UIButton!
-    private var shareButton: UIButton!
-    private var progressView: UIProgressView!
-    private var progressObservation: NSKeyValueObservation?
+    private let backgroundColorHex: String?
     
-    init(url: URL) {
+    var onClose: (() -> Void)?
+    var onSuccess: (() -> Void)?
+    var onInvalid: (() -> Void)?
+
+    init(
+        url: URL,
+        backgroundColorHex: String? = nil,
+        onClose: (() -> Void)? = nil,
+        onSuccess: (() -> Void)? = nil,
+        onInvalid: (() -> Void)? = nil
+    ) {
         self.url = url
+        self.backgroundColorHex = backgroundColorHex
+        self.onClose = onClose
+        self.onSuccess = onSuccess
+        self.onInvalid = onInvalid
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -29,20 +39,22 @@ class WebViewController: UIViewController, WKNavigationDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        if let hex = backgroundColorHex, let color = UIColor(hex: hex) {
+            view.backgroundColor = color
+        }
+        
         setupWebView()
-        setupCloseButton()
-        setupShareButton()
-        setupProgressView()
     }
     
     private func setupWebView() {
         let configuration = WKWebViewConfiguration()
+        configuration.userContentController.add(self, name: "ReactNativeWebView")
         webView = WKWebView(frame: view.bounds, configuration: configuration)
         webView.load(URLRequest(url: url))
         webView.frame = view.bounds
         webView.backgroundColor = .black
         webView.navigationDelegate = self
-        webView.allowsBackForwardNavigationGestures = true
+        webView.allowsBackForwardNavigationGestures = false
         webView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(webView)
         
@@ -53,91 +65,32 @@ class WebViewController: UIViewController, WKNavigationDelegate {
             webView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
     }
-    
-    private func setupCloseButton() {
-        closeButton = UIButton(type: .roundedRect)
-        closeButton.setTitle("✕", for: .normal)
-        closeButton.titleLabel?.font = UIFont.systemFont(ofSize: 20)
-        closeButton.setTitleColor(.white, for: .normal)
-        closeButton.clipsToBounds = true
-        closeButton.layer.cornerRadius = 16
-        closeButton.backgroundColor = UIColor.white.withAlphaComponent(0.4)
-        closeButton.setTitleColor(.white, for: .normal)
-        closeButton.addTarget(self, action: #selector(closeTapped), for: .touchUpInside)
-        closeButton.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(closeButton)
-        
-        NSLayoutConstraint.activate([
-            closeButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
-            closeButton.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
-            closeButton.widthAnchor.constraint(equalToConstant: 32),
-            closeButton.heightAnchor.constraint(equalToConstant: 32)
-        ])
-    }
-    
-    private func setupShareButton() {
-        shareButton = UIButton(type: .roundedRect)
-        #if SWIFT_PACKAGE
-            let bundle = Bundle.module
-        #else
-            let bundle = Bundle(for: WebViewController.self)
-        #endif
-        shareButton.setImage(UIImage(named: "share-icon", in: bundle, with: nil), for: .normal)
-        shareButton.imageEdgeInsets = UIEdgeInsets(top: 5, left: 5, bottom: 5, right: 5)
-        shareButton.tintColor = .white
-        shareButton.clipsToBounds = true
-        shareButton.layer.cornerRadius = 16
-        shareButton.backgroundColor = UIColor.white.withAlphaComponent(0.4)
-        shareButton.setTitleColor(.white, for: .normal)
-        shareButton.addTarget(self, action: #selector(shareTapped), for: .touchUpInside)
-        shareButton.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(shareButton)
-        
-        NSLayoutConstraint.activate([
-            shareButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
-            shareButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
-            shareButton.widthAnchor.constraint(equalToConstant: 32),
-            shareButton.heightAnchor.constraint(equalToConstant: 32)
-        ])
-    }
-    
-    
-    private func setupProgressView() {
-        progressView = UIProgressView(progressViewStyle: .default)
-        progressView.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(progressView)
-        
-        NSLayoutConstraint.activate([
-            progressView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            progressView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            progressView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-        ])
-    }
-    
-    @objc func closeTapped() {
-        if let navController = navigationController, navController.viewControllers.count > 1 {
-            navController.popViewController(animated: true)
-        } else {
-            dismiss(animated: true, completion: nil)
+
+    func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
+        guard message.name == "ReactNativeWebView",
+              let body = message.body as? String,
+              let data = body.data(using: .utf8),
+              let obj = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let event = obj["event"] as? String else {
+            return
+        }
+        switch event {
+        case "close":
+            self.dismiss(animated: true)
+            self.onClose?()
+        case "success":
+            self.onSuccess?()
+        case "invalid":
+            self.onInvalid?()
+        default:
+            break
         }
     }
-    
-    @objc func shareTapped(sender: UIView) {
-        let message = "Hello world"
-        let activityVC = UIActivityViewController(activityItems: [message], applicationActivities: nil)
-        activityVC.popoverPresentationController?.sourceView = sender
-        
-        if let topViewController = UIApplication.shared.topMostViewController() {
-            topViewController.present(activityVC, animated: true, completion: nil)
-        }
-    }
-    
-    private func updateProgress() {
-        progressView.progress = Float(webView.estimatedProgress)
-        progressView.isHidden = webView.estimatedProgress == 1
-    }
-    
+
     deinit {
-        progressObservation?.invalidate()
+        let webView = self.webView
+        Task { @MainActor in
+            webView?.configuration.userContentController.removeScriptMessageHandler(forName: "ReactNativeWebView")
+        }
     }
 }

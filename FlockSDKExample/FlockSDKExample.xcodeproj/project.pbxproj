@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		C61FFB422CAE66C200FCE0E4 /* FlockSDK in Frameworks */ = {isa = PBXBuildFile; productRef = C61FFB412CAE66C200FCE0E4 /* FlockSDK */; };
+		C6851DF82CE2020A009EE79C /* FlockSDK in Frameworks */ = {isa = PBXBuildFile; productRef = C6851DF72CE2020A009EE79C /* FlockSDK */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -64,6 +65,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C6851DF82CE2020A009EE79C /* FlockSDK in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -141,6 +143,7 @@
 			);
 			name = FlockSDKExampleTests;
 			packageProductDependencies = (
+				C6851DF72CE2020A009EE79C /* FlockSDK */,
 			);
 			productName = FlockSDKExampleTests;
 			productReference = C61FFB1E2CAE579100FCE0E4 /* FlockSDKExampleTests.xctest */;
@@ -575,6 +578,11 @@
 
 /* Begin XCSwiftPackageProductDependency section */
 		C61FFB412CAE66C200FCE0E4 /* FlockSDK */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C61FFB402CAE66C200FCE0E4 /* XCRemoteSwiftPackageReference "FlockSDK-iOS" */;
+			productName = FlockSDK;
+		};
+		C6851DF72CE2020A009EE79C /* FlockSDK */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = C61FFB402CAE66C200FCE0E4 /* XCRemoteSwiftPackageReference "FlockSDK-iOS" */;
 			productName = FlockSDK;
