@@ -43,10 +43,10 @@ public class Flock: NSObject {
     publicAccessKey: String,
     environment: FlockEnvironment,
     overrideApiURL: String? = nil
-  ) throws -> Flock {
+  ) -> Flock? {
     guard flock == nil else {
-      logger.warning("FlockSDK has already been initialized. Please call FlockSDK.initialized() only once")
-      throw FlockSDKErrors.uninitialized("FlockSDK has already been initialized. Please call FlockSDK.initialized() only once")
+      logger.error("FlockSDK has already been initialized. Please call FlockSDK.initialized() only once")
+      return nil
     }
 
     let instance = Flock(publicAccessKey: publicAccessKey, environment: environment, overrideApiURL: overrideApiURL)
@@ -85,9 +85,10 @@ public class Flock: NSObject {
 
    - Throws: `FlockSDKErrors.uninitialized` if SDK is not initialized.
    */
-  public func identify(externalUserId: String, email: String, name: String?) throws {
+  public func identify(externalUserId: String, email: String, name: String?) {
     guard isInitialized else {
-      throw FlockSDKErrors.uninitialized("FlockSDK is not initialized. Please call FlockSDK.initialize() first")
+      Flock.logger.error("FlockSDK is not initialized. Please call FlockSDK.initialize() first")
+      return
     }
 
     Task {
@@ -119,9 +120,10 @@ public class Flock: NSObject {
     onClose: (() -> Void)? = nil,
     onSuccess: (() -> Void)? = nil,
     onInvalid: (() -> Void)? = nil
-  ) throws {
+  ) {
     guard isInitialized else {
-      throw FlockSDKErrors.uninitialized("FlockSDK is not initialized. Please call FlockSDK.initialize() first")
+      Flock.logger.error("FlockSDK is not initialized. Please call FlockSDK.initialize() first")
+      return
     }
     guard let url = buildWebPageURL(type: type) else {
       Flock.logger.error("Cannot build web page URL for type: \(type)")
