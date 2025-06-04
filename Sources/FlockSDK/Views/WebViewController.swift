@@ -47,6 +47,8 @@ class WebViewController: UIViewController, WKNavigationDelegate, WKScriptMessage
     let configuration = WKWebViewConfiguration()
     configuration.userContentController.add(self, name: "ReactNativeWebView")
 
+    // Injecting ReactNativeWebView interface to the webpage.
+    // This is a hack until our webpage support native webkit interface.
     let userScript = WKUserScript(source: """
       window.ReactNativeWebView = {
         postMessage: function(message) {

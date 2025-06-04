@@ -115,7 +115,6 @@ public class Flock: NSObject {
    */
   public func openPage(
     type: String,
-    style: WebViewPresentationStyle = .fullscreen,
     onClose: (() -> Void)? = nil,
     onSuccess: (() -> Void)? = nil,
     onInvalid: (() -> Void)? = nil
@@ -127,7 +126,7 @@ public class Flock: NSObject {
         guard success else {
           return
         }
-        self?.openPage(type: type, style: style, onClose: onClose, onSuccess: onSuccess, onInvalid: onInvalid)
+        self?.openPage(type: type, onClose: onClose, onSuccess: onSuccess, onInvalid: onInvalid)
       }
       return
     }
@@ -148,13 +147,8 @@ public class Flock: NSObject {
           topViewController.presentedViewController == nil
     else { return }
 
-    switch style {
-    case .modal:
-      topViewController.present(webViewController, animated: true)
-    case .fullscreen:
-      webViewController.modalPresentationStyle = .overFullScreen
-      topViewController.present(webViewController, animated: true)
-    }
+    webViewController.modalPresentationStyle = .pageSheet
+    topViewController.present(webViewController, animated: true)
   }
 
   private func buildWebPageURL(type: String) -> URL? {
