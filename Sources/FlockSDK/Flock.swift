@@ -50,7 +50,7 @@ public class Flock: NSObject {
         self.initializationCompletionHandlers.forEach { $0(true) }
         self.initializationCompletionHandlers.removeAll()
       } catch {
-        Flock.logger.error("Error during initialization: \(error.localizedDescription)")
+        Flock.logger.error("Error during initialization: \(error)")
         completion?(false)
         self.initializationCompletionHandlers.forEach { $0(false) }
         self.initializationCompletionHandlers.removeAll()
@@ -61,7 +61,7 @@ public class Flock: NSObject {
       do {
         try await campaignService.ping(campaignId: campaign.id)
       } catch {
-        Flock.logger.warning("Error pinging Flock: \(error.localizedDescription)")
+        Flock.logger.warning("Error pinging Flock: \(error)")
       }
     }
   }
