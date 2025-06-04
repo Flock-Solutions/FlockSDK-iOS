@@ -24,7 +24,7 @@ struct CampaignService {
   }
 
   func getLiveCampaign(environment: FlockEnvironment) async throws -> Campaign {
-    var components = try URLComponents(url: urlBuilder.build(path: "/campaigns/live"), resolvingAgainstBaseURL: false)
+    var components = try URLComponents(url: urlBuilder.build(path: "/campaigns/live"), resolvingAgainstBaseURL: true)
 
     components?.queryItems = [
       URLQueryItem(name: "environment", value: environment.rawValue)
