@@ -75,11 +75,19 @@ class WebViewController: UIViewController, WKNavigationDelegate, WKScriptMessage
         webView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         webView.navigationDelegate = self
         webView.allowsBackForwardNavigationGestures = false
+        webView.translatesAutoresizingMaskIntoConstraints = false
         webView.isOpaque = false
         if let hex = backgroundColorHex, let color = UIColor(hex: hex) {
             webView.backgroundColor = color
         }
         view.addSubview(webView)
+
+        NSLayoutConstraint.activate([
+            webView.topAnchor.constraint(equalTo: view.topAnchor),
+            webView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            webView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            webView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        ])
     }
 
     func userContentController(_: WKUserContentController, didReceive message: WKScriptMessage) {
