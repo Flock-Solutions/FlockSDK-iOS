@@ -6,73 +6,64 @@ import UIKit
 @available(iOS 14.0, *)
 @MainActor
 public class Flock: NSObject {
-  private static var flock: Flock?
+  public static let shared = Flock()
+
   private static let logger = Logger(
     subsystem: Bundle.main.bundleIdentifier!,
     category: String(describing: Flock.self)
   )
 
   private(set) var isInitialized = false
+  private var initializationCompletionHandlers: [(Bool) -> Void] = []
 
-  private let publicAccessKey: String
-  private let environment: FlockEnvironment
+  /** Entities */
+  private var publicAccessKey: String?
+  private var environment: FlockEnvironment?
   private var campaign: Campaign?
   private var customer: Customer?
 
-  private let campaignService: CampaignService
-  private let customerService: CustomerService
+  /** Services */
+  private var campaignService: CampaignService?
+  private var customerService: CustomerService?
 
-  private init(publicAccessKey: String, environment: FlockEnvironment, overrideApiURL: String? = nil) {
-    self.publicAccessKey = publicAccessKey
-    self.environment = environment
-    campaignService = CampaignService(publicAccessKey: self.publicAccessKey, baseURL: overrideApiURL)
-    customerService = CustomerService(publicAccessKey: self.publicAccessKey, baseURL: overrideApiURL)
-  }
+  override private init() {}
 
-  public static func shared() -> Flock? {
-    guard let flock else {
-      logger.warning("FlockSDK has not been initialized. Please call FlockSDK.initialized()")
-      assertionFailure("FlockSDK has not been initialized. Please call FlockSDK.initialized()")
-      return nil
-    }
-    return flock
-  }
-
-  @discardableResult
-  public static func initialize(
+  public func initialize(
     publicAccessKey: String,
     environment: FlockEnvironment,
-    overrideApiURL: String? = nil
-  ) -> Flock? {
-    guard flock == nil else {
-      logger.error("FlockSDK has already been initialized. Please call FlockSDK.initialized() only once")
-      return nil
-    }
+    overrideApiURL: String? = nil,
+    completion: ((Bool) -> Void)? = nil
+  ) {
+    self.publicAccessKey = publicAccessKey
+    self.environment = environment
+    campaignService = CampaignService(publicAccessKey: publicAccessKey, baseURL: overrideApiURL)
+    customerService = CustomerService(publicAccessKey: publicAccessKey, baseURL: overrideApiURL)
 
-    let instance = Flock(publicAccessKey: publicAccessKey, environment: environment, overrideApiURL: overrideApiURL)
-    flock = instance
-
-    // Fetch live campaign from Flock
+    // Fetch the live campaign from Flock
     Task { @MainActor in
-      var campaign: Campaign?
+      guard let campaignService = self.campaignService else { return }
       do {
-        campaign = try await instance.campaignService.getLiveCampaign(environment: environment)
-        instance.campaign = campaign
+        let campaign = try await campaignService.getLiveCampaign(environment: environment)
+        self.campaign = campaign
+        self.isInitialized = true
+        completion?(true)
+        self.initializationCompletionHandlers.forEach { $0(true) }
+        self.initializationCompletionHandlers.removeAll()
       } catch {
-        logger.error("Error fetching live campaign during initialization: \(error)")
+        Flock.logger.error("Error during initialization: \(error.localizedDescription)")
+        completion?(false)
+        self.initializationCompletionHandlers.forEach { $0(false) }
+        self.initializationCompletionHandlers.removeAll()
       }
 
-      guard let campaign else { return }
+      // Pinging the server
+      guard let campaign = self.campaign else { return }
       do {
-        try await instance.campaignService.ping(campaignId: campaign.id)
+        try await campaignService.ping(campaignId: campaign.id)
       } catch {
-        logger.error("Error pinging campaign during initialization: \(error)")
+        Flock.logger.warning("Error pinging Flock: \(error.localizedDescription)")
       }
     }
-
-    instance.isInitialized = true
-
-    return instance
   }
 
   /**
@@ -86,14 +77,26 @@ public class Flock: NSObject {
   public func identify(externalUserId: String, email: String, name: String?) {
     guard isInitialized else {
       Flock.logger.error("FlockSDK is not initialized. Please call FlockSDK.initialize() first")
+      // Queue the identify call to be called after initialization
+      initializationCompletionHandlers.append { [weak self] success in
+        guard success else {
+          return
+        }
+        self?.identify(externalUserId: externalUserId, email: email, name: name)
+      }
       return
     }
 
     Task {
       guard let campaign else { return }
+      guard let customerService = self.customerService else { return }
+
       do {
-        let identifyRequest = IdentifyRequest(externalUserId: externalUserId, email: email, name: name, campaignId: campaign.id)
-        customer = try await customerService.identify(identifyRequest: identifyRequest)
+        let identifyRequest = IdentifyRequest(
+          externalUserId: externalUserId, email: email, name: name, campaignId: campaign.id
+        )
+
+        self.customer = try await customerService.identify(identifyRequest: identifyRequest)
       } catch {
         Flock.logger.error("Error identifying customer: \(error)")
       }
@@ -119,8 +122,16 @@ public class Flock: NSObject {
   ) {
     guard isInitialized else {
       Flock.logger.error("FlockSDK is not initialized. Please call FlockSDK.initialize() first")
+      // Queue the openPage call to be called after initialization
+      initializationCompletionHandlers.append { [weak self] success in
+        guard success else {
+          return
+        }
+        self?.openPage(type: type, style: style, onClose: onClose, onSuccess: onSuccess, onInvalid: onInvalid)
+      }
       return
     }
+
     guard let url = buildWebPageURL(type: type) else {
       Flock.logger.error("Cannot build web page URL for type: \(type)")
       return
@@ -134,7 +145,8 @@ public class Flock: NSObject {
     )
 
     guard let topViewController = UIApplication.shared.topMostViewController(),
-          topViewController.presentedViewController == nil else { return }
+          topViewController.presentedViewController == nil
+    else { return }
 
     switch style {
     case .modal:
@@ -161,7 +173,7 @@ public class Flock: NSObject {
     let appBaseURL = "https://app.withflock.com"
 
     // Build URL string
-    var urlString = "\(appBaseURL)/pages/\(path)?key=\(publicAccessKey)"
+    var urlString = "\(appBaseURL)/pages/\(path)?key=\(publicAccessKey ?? "")"
 
     if let campaignId = campaign?.id {
       urlString += "&campaign_id=\(campaignId)"
