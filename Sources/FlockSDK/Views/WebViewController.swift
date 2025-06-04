@@ -75,7 +75,6 @@ class WebViewController: UIViewController, WKNavigationDelegate, WKScriptMessage
         webView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         webView.navigationDelegate = self
         webView.allowsBackForwardNavigationGestures = false
-        webView.translatesAutoresizingMaskIntoConstraints = false
         webView.isOpaque = false
         if let hex = backgroundColorHex, let color = UIColor(hex: hex) {
             webView.backgroundColor = color
