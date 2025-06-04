@@ -76,8 +76,6 @@ try? Flock.shared.openPage(
 )
 ```
 
-You can set `style: .fullscreen` for a fullscreen experience.
-
 ## Support
 
 If you run into issues or need support, open an [issue](https://github.com/Flock-Solutions/FlockSDK-iOS/issues) or contact us at <support@withflock.com>.
