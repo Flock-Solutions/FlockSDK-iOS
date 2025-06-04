@@ -23,7 +23,7 @@ Add to your Xcode project via `File > Add Packages...` and use this repo's URL:
 <https://github.com/Flock-Solutions/FlockSDK-iOS.git>
 
 ```swift
-.package(url: "https://github.com/Flock-Solutions/FlockSDK-iOS.git", from: "0.0.1")
+.package(url: "https://github.com/Flock-Solutions/FlockSDK-iOS.git", from: "1.0.0")
 ```
 
 Then add `"FlockSDK"` as a dependency for your target.
@@ -48,7 +48,7 @@ try? Flock.initialize(
 Identify the current user (after login or at app start):
 
 ```swift
-try? Flock.shared().identify(
+try? Flock.shared.identify(
     externalUserId: "<USER_ID_IN_YOUR_APP>",
     email: "user@example.com",
     name: "Alice Smith"
@@ -62,7 +62,7 @@ Present the referral page anywhere in your app:
 ```swift
 import FlockSDK
 
-try? Flock.shared().openPage(
+try? Flock.shared.openPage(
     type: "referrer", // Or "invitee" or "invitee?state=success"
     style: .modal,
     onClose: {
