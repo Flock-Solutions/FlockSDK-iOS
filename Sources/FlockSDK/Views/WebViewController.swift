@@ -41,6 +41,8 @@ class WebViewController: UIViewController, WKNavigationDelegate, WKScriptMessage
     override func viewDidLoad() {
         super.viewDidLoad()
         setNeedsStatusBarAppearanceUpdate()
+        edgesForExtendedLayout = [.top, .bottom]
+
         setupWebView()
     }
 
