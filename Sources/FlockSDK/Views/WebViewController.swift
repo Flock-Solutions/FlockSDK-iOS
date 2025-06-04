@@ -46,6 +46,21 @@ class WebViewController: UIViewController, WKNavigationDelegate, WKScriptMessage
   private func setupWebView() {
     let configuration = WKWebViewConfiguration()
     configuration.userContentController.add(self, name: "ReactNativeWebView")
+
+    let userScript = WKUserScript(source: """
+      window.ReactNativeWebView = {
+        postMessage: function(message) {
+          window.webkit.messageHandlers.ReactNativeWebView.postMessage(message);
+        }
+      };
+    """, injectionTime: .atDocumentStart, forMainFrameOnly: false)
+
+    configuration.userContentController.addUserScript(userScript)
+
+    let preferences = WKWebpagePreferences()
+    preferences.allowsContentJavaScript = true
+    configuration.defaultWebpagePreferences = preferences
+
     webView = WKWebView(frame: view.bounds, configuration: configuration)
     webView.load(URLRequest(url: url))
     webView.frame = view.bounds
