@@ -12,6 +12,5 @@ public struct Customer: Codable, Sendable {
   let referralCode: String
   let visitedReferralsCount: Int
   let convertedReferralsCount: Int
-  let campaignId: String
   let referredById: String?
 }
