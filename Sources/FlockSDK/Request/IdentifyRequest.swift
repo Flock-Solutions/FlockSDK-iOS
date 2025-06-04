@@ -6,8 +6,8 @@
 //
 
 struct IdentifyRequest: Encodable {
-  let externalUserId: String
-  let email: String
-  let name: String?
-  let campaignId: String
+    let externalUserId: String
+    let email: String
+    let name: String?
+    let campaignId: String
 }

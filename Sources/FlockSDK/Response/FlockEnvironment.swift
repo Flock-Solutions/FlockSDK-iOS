@@ -6,6 +6,6 @@
 //
 
 public enum FlockEnvironment: String, Codable, Sendable {
-  case test
-  case production
+    case test
+    case production
 }

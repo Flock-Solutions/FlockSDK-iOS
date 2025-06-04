@@ -6,5 +6,5 @@
 //
 
 public enum FlockSDKErrors: Error {
-  case uninitialized(String)
+    case uninitialized(String)
 }

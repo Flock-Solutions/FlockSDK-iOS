@@ -7,17 +7,17 @@
 import Foundation
 
 struct URLBuilder {
-  private let baseURL: URL?
+    private let baseURL: URL?
 
-  init(baseURL: String? = nil) {
-    self.baseURL = URL(string: baseURL ?? "https://api.withflock.com")
-  }
-
-  func build(path: String) throws -> URL {
-    guard baseURL != nil, let url = URL(string: path, relativeTo: baseURL) else {
-      throw URLError(.badURL)
+    init(baseURL: String? = nil) {
+        self.baseURL = URL(string: baseURL ?? "https://api.withflock.com")
     }
 
-    return url
-  }
+    func build(path: String) throws -> URL {
+        guard baseURL != nil, let url = URL(string: path, relativeTo: baseURL) else {
+            throw URLError(.badURL)
+        }
+
+        return url
+    }
 }
