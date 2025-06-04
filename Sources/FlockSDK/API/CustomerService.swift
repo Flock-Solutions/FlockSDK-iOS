@@ -19,7 +19,7 @@ struct CustomerService {
   )
 
   init(publicAccessKey: String, baseURL: String?) {
-    urlBuilder = URLBuilder(baseURL: baseURL ?? "https://api.withflock.com")
+    urlBuilder = URLBuilder(baseURL: baseURL)
     requestBuilder = RequestBuilder(apiKey: publicAccessKey)
   }
 

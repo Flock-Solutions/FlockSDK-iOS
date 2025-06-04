@@ -76,7 +76,7 @@ public class Flock: NSObject {
    */
   public func identify(externalUserId: String, email: String, name: String?) {
     guard isInitialized else {
-      Flock.logger.error("FlockSDK is not initialized. Please call FlockSDK.initialize() first")
+      Flock.logger.debug("FlockSDK is not initialized. Queuing identify call...")
       // Queue the identify call to be called after initialization
       initializationCompletionHandlers.append { [weak self] success in
         guard success else {
@@ -121,7 +121,7 @@ public class Flock: NSObject {
     onInvalid: (() -> Void)? = nil
   ) {
     guard isInitialized else {
-      Flock.logger.error("FlockSDK is not initialized. Please call FlockSDK.initialize() first")
+      Flock.logger.debug("FlockSDK is not initialized. Queuing openPage call...")
       // Queue the openPage call to be called after initialization
       initializationCompletionHandlers.append { [weak self] success in
         guard success else {

@@ -19,12 +19,13 @@ struct CampaignService {
   )
 
   init(publicAccessKey: String, baseURL: String?) {
-    urlBuilder = URLBuilder(baseURL: baseURL ?? "https://api.withflock.com")
+    urlBuilder = URLBuilder(baseURL: baseURL)
     requestBuilder = RequestBuilder(apiKey: publicAccessKey)
   }
 
   func getLiveCampaign(environment: FlockEnvironment) async throws -> Campaign {
     var components = try URLComponents(url: urlBuilder.build(path: "/campaigns/live"), resolvingAgainstBaseURL: false)
+
     components?.queryItems = [
       URLQueryItem(name: "environment", value: environment.rawValue)
     ]
