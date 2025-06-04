@@ -41,7 +41,14 @@ struct CampaignService {
       throw URLError(.badServerResponse)
     }
 
-    print(data)
+    if let jsonObject = try? JSONSerialization.jsonObject(with: data, options: []),
+       let jsonData = try? JSONSerialization.data(withJSONObject: jsonObject, options: [.prettyPrinted]),
+       let jsonString = String(data: jsonData, encoding: .utf8)
+    {
+      print(jsonString)
+    } else {
+      print("Failed to parse JSON")
+    }
 
     let campaign = try JSONDecoder().decode(Campaign.self, from: data)
     return campaign
