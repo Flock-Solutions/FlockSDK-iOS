@@ -12,6 +12,7 @@ class WebViewController: UIViewController, WKNavigationDelegate, WKScriptMessage
   private var webView: WKWebView!
   private let url: URL
   private let backgroundColorHex: String?
+  private static let messageHandlerName = "FlockWebView"
 
   var onClose: (() -> Void)?
   var onSuccess: (() -> Void)?
@@ -45,14 +46,14 @@ class WebViewController: UIViewController, WKNavigationDelegate, WKScriptMessage
 
   private func setupWebView() {
     let configuration = WKWebViewConfiguration()
-    configuration.userContentController.add(self, name: "ReactNativeWebView")
+    configuration.userContentController.add(self, name: WebViewController.messageHandlerName)
 
     // Injecting ReactNativeWebView interface to the webpage.
-    // This is a hack until our webpage support native webkit interface.
+    // This is a hack until our webpage support native webkit interface.
     let userScript = WKUserScript(source: """
       window.ReactNativeWebView = {
         postMessage: function(message) {
-          window.webkit.messageHandlers.ReactNativeWebView.postMessage(message);
+          window.webkit.messageHandlers.\(WebViewController.messageHandlerName).postMessage(message);
         }
       };
     """, injectionTime: .atDocumentStart, forMainFrameOnly: false)
@@ -83,7 +84,7 @@ class WebViewController: UIViewController, WKNavigationDelegate, WKScriptMessage
   }
 
   func userContentController(_: WKUserContentController, didReceive message: WKScriptMessage) {
-    guard message.name == "ReactNativeWebView",
+    guard message.name == WebViewController.messageHandlerName,
           let body = message.body as? String,
           let data = body.data(using: .utf8),
           let obj = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
@@ -107,7 +108,7 @@ class WebViewController: UIViewController, WKNavigationDelegate, WKScriptMessage
   deinit {
     let webView = self.webView
     Task { @MainActor in
-      webView?.configuration.userContentController.removeScriptMessageHandler(forName: "ReactNativeWebView")
+      webView?.configuration.userContentController.removeScriptMessageHandler(forName: WebViewController.messageHandlerName)
     }
   }
 }
