@@ -62,7 +62,7 @@ jobs:
             patch=$((patch + 1))
           fi
 
-          new_version="v$major.$minor.$patch"
+          new_version="$major.$minor.$patch"
           echo "new_version=$new_version" >> $GITHUB_OUTPUT
 
       - name: Create and push tag
