@@ -19,7 +19,6 @@ public struct CampaignPage: Codable, Sendable {
   public let id: String
   public let path: String
   public let isEmpty: Bool
-  public let url: String
   public let screenProps: ScreenProps?
 }
 
