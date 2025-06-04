@@ -41,6 +41,8 @@ struct CampaignService {
       throw URLError(.badServerResponse)
     }
 
+    print(data)
+
     let campaign = try JSONDecoder().decode(Campaign.self, from: data)
     return campaign
   }
