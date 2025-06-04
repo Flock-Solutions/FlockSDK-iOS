@@ -40,10 +40,6 @@ class WebViewController: UIViewController, WKNavigationDelegate, WKScriptMessage
   override func viewDidLoad() {
     super.viewDidLoad()
 
-    if let hex = backgroundColorHex, let color = UIColor(hex: hex) {
-      view.backgroundColor = color
-    }
-
     setupWebView()
   }
 
@@ -53,10 +49,12 @@ class WebViewController: UIViewController, WKNavigationDelegate, WKScriptMessage
     webView = WKWebView(frame: view.bounds, configuration: configuration)
     webView.load(URLRequest(url: url))
     webView.frame = view.bounds
-    webView.backgroundColor = .black
     webView.navigationDelegate = self
     webView.allowsBackForwardNavigationGestures = false
     webView.translatesAutoresizingMaskIntoConstraints = false
+    if let hex = backgroundColorHex, let color = UIColor(hex: hex) {
+      webView.backgroundColor = color
+    }
     view.addSubview(webView)
 
     NSLayoutConstraint.activate([
