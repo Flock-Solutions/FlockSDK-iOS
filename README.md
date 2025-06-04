@@ -64,7 +64,6 @@ import FlockSDK
 
 try? Flock.shared.openPage(
     type: "referrer", // Or "invitee" or "invitee?state=success"
-    style: .modal,
     onClose: {
         // Called when closed
     },
