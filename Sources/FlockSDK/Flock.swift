@@ -154,7 +154,7 @@ public class Flock: NSObject {
               topViewController.presentedViewController == nil
         else { return }
 
-        webViewController.modalPresentationStyle = .automatic
+        webViewController.modalPresentationStyle = .fullScreen
         topViewController.present(webViewController, animated: true)
     }
 
