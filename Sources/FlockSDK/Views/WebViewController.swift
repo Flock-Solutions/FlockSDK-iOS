@@ -40,8 +40,12 @@ class WebViewController: UIViewController, WKNavigationDelegate, WKScriptMessage
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        setNeedsStatusBarAppearanceUpdate()
         setupWebView()
+    }
+
+    override var prefersStatusBarHidden: Bool {
+        true
     }
 
     private func setupWebView() {
