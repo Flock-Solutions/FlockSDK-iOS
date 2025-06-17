@@ -242,6 +242,15 @@ public class Flock: NSObject {
             urlString += "&customer_id=\(customerId)"
         }
 
+        // Find the campaign page for this type
+        let campaignPage = campaign?.campaignPages.first { $0.placementId?.contains(placementId) ?? false }
+
+        // Use backgroundColor if available
+        let backgroundColor = campaignPage?.screenProps?.backgroundColor
+        if let backgroundColor {
+            urlString += "&bg=\(backgroundColor)"
+        }
+
         return URL(string: urlString)
     }
 
