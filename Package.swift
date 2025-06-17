@@ -25,6 +25,9 @@ let package = Package(
             path: "Sources",
             resources: [
                 .process("Resources")
+            ],
+            swiftSettings: [
+                .unsafeFlags(["-swift-version", "5.5"])
             ]
         ),
         .testTarget(

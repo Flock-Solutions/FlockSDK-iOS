@@ -221,12 +221,6 @@ public class Flock: NSObject {
     }
 
     private func buildWebPageURL(placementId: String) -> URL? {
-        // Find the campaign page for this placementId
-        guard let campaignPage = campaign?.campaignPages.first(where: { $0.id == placementId }) else {
-            Flock.logger.error("No campaign page found for placementId: \(placementId)")
-            return nil
-        }
-
         // Prepare base url
         let uiBaseUrl = uiBaseUrl
 
