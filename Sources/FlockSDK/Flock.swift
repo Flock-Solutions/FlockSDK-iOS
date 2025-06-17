@@ -205,8 +205,15 @@ public class Flock: NSObject {
             return
         }
 
+        // Find the campaign page for this type
+        let campaignPage = campaign?.campaignPages.first { $0.placementId?.contains(placementId) ?? false }
+
+        // Use backgroundColor if available
+        let backgroundColor = campaignPage?.screenProps?.backgroundColor
+
         let webViewController = WebViewController(
             url: url,
+            backgroundColorHex: backgroundColor,
             onClose: onClose,
             onSuccess: onSuccess,
             onInvalid: onInvalid
