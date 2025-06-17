@@ -26,6 +26,18 @@ public class Flock: NSObject {
     private var campaignService: CampaignService?
     private var customerService: CustomerService?
 
+    /** Base URLs */
+    private var uiBaseUrl: String = "https://app.withflock.com"
+    private var apiBaseUrl: String = "https://api.withflock.com"
+
+    /**
+     For internal/testing use only: allows overriding the base URLs (e.g. in a sample app)
+     */
+    public func setBaseUrlForTesting(uiUrl: String, apiUrl: String) {
+        uiBaseUrl = uiUrl
+        apiBaseUrl = apiUrl
+    }
+
     override private init() {}
 
     public func initialize(
@@ -36,8 +48,8 @@ public class Flock: NSObject {
     ) {
         self.publicAccessKey = publicAccessKey
         self.environment = environment
-        campaignService = CampaignService(publicAccessKey: publicAccessKey, baseURL: overrideApiURL)
-        customerService = CustomerService(publicAccessKey: publicAccessKey, baseURL: overrideApiURL)
+        campaignService = CampaignService(publicAccessKey: publicAccessKey, baseURL: overrideApiURL ?? apiBaseUrl)
+        customerService = CustomerService(publicAccessKey: publicAccessKey, baseURL: overrideApiURL ?? apiBaseUrl)
 
         // Fetch the live campaign from Flock
         Task { @MainActor in
@@ -106,6 +118,8 @@ public class Flock: NSObject {
     /**
      Opens a Flock web page in a modal or fullscreen style.
 
+     WARNING: This method is deprecated. Use addPlacement with placementId instead.
+
      - Parameters:
         - type: The page type or path to open
         - style: Presentation style (.modal or .fullscreen). Default is .fullscreen.
@@ -113,6 +127,7 @@ public class Flock: NSObject {
         - onSuccess: Callback executed when the page reports a success event.
         - onInvalid: Callback executed when the page reports an invalid event.
      */
+    @available(*, deprecated, message: "Use addPlacement with placementId instead")
     public func openPage(
         type: String,
         onClose: (() -> Void)? = nil,
@@ -156,6 +171,77 @@ public class Flock: NSObject {
 
         webViewController.modalPresentationStyle = .fullScreen
         topViewController.present(webViewController, animated: true)
+    }
+
+    /**
+     Adds a placement to the current campaign.
+
+     - Parameters:
+        - placementId: The unique identifier for the placement
+        - onClose: Callback executed when the placement is closed.
+        - onSuccess: Callback executed when the placement reports a success event.
+        - onInvalid: Callback executed when the placement reports an invalid event.
+     */
+    public func addPlacement(
+        placementId: String,
+        onClose: (() -> Void)? = nil,
+        onSuccess: (() -> Void)? = nil,
+        onInvalid: (() -> Void)? = nil
+    ) {
+        guard isInitialized else {
+            Flock.logger.debug("FlockSDK is not initialized. Queuing addPlacement call...")
+            // Queue the addPlacement call to be called after initialization
+            initializationCompletionHandlers.append { [weak self] success in
+                guard success else {
+                    return
+                }
+                self?.addPlacement(placementId: placementId, onClose: onClose, onSuccess: onSuccess, onInvalid: onInvalid)
+            }
+            return
+        }
+
+        guard let url = buildWebPageURL(placementId: placementId) else {
+            Flock.logger.error("Cannot build web page URL for placementId: \(placementId)")
+            return
+        }
+
+        let webViewController = WebViewController(
+            url: url,
+            onClose: onClose,
+            onSuccess: onSuccess,
+            onInvalid: onInvalid
+        )
+
+        guard let topViewController = UIApplication.shared.topMostViewController(),
+              topViewController.presentedViewController == nil
+        else { return }
+
+        webViewController.modalPresentationStyle = .fullScreen
+        topViewController.present(webViewController, animated: true)
+    }
+
+    private func buildWebPageURL(placementId: String) -> URL? {
+        // Find the campaign page for this placementId
+        guard let campaignPage = campaign?.campaignPages.first(where: { $0.id == placementId }) else {
+            Flock.logger.error("No campaign page found for placementId: \(placementId)")
+            return nil
+        }
+
+        // Prepare base url
+        let uiBaseUrl = uiBaseUrl
+
+        // Build URL string
+        var urlString = "\(uiBaseUrl)/placements/\(placementId)?key=\(publicAccessKey ?? "")"
+
+        if let campaignId = campaign?.id {
+            urlString += "&campaign_id=\(campaignId)"
+        }
+
+        if let customerId = customer?.id {
+            urlString += "&customer_id=\(customerId)"
+        }
+
+        return URL(string: urlString)
     }
 
     private func buildWebPageURL(type: String) -> URL? {
