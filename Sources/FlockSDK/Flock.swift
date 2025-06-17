@@ -1,7 +1,7 @@
-import Foundation
-import os
-import SwiftUI
-import UIKit
+@_exported import Foundation
+@_exported import os
+@_exported import SwiftUI
+@_exported import UIKit
 
 @available(iOS 14.0, *)
 @MainActor
