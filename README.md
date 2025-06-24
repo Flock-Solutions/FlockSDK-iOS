@@ -37,7 +37,7 @@ Call `Flock.initialize` once, for example in your `AppDelegate` or early in your
 ```swift
 import FlockSDK
 
-try? Flock.initialize(
+try? Flock.shared.initialize(
     publicAccessKey: "<YOUR_FLOCK_PUBLIC_KEY>",
     environment: .production // or .test
 )
