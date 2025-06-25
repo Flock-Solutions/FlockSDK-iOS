@@ -47,6 +47,9 @@ jobs:
         run: |
           latest=${{ steps.latest_tag.outputs.latest_tag }}
           bump=${{ github.event.inputs.bump }}
+          
+          # Remove leading 'v' if present
+          version=${latest#v}
 
           IFS='.' read -r major minor patch <<< "$version"
 
