@@ -246,7 +246,7 @@ public class Flock: NSObject {
         let campaignPage = campaign?.campaignPages.first { $0.placementId?.contains(placementId) ?? false }
 
         // Use backgroundColor if available
-        let backgroundColor = campaignPage?.screenProps?.backgroundColor
+        let backgroundColor = campaignPage?.screenProps?.backgroundColor?.addingPercentEncoding(withAllowedCharacters: .alphanumerics)
         if let backgroundColor {
             urlString += "&bg=\(backgroundColor)"
         }
