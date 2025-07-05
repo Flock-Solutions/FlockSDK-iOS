@@ -8,22 +8,22 @@
 import WebKit
 
 @available(iOS 13.0, *)
-class WebViewController: UIViewController, WKNavigationDelegate, WKScriptMessageHandler {
+public class WebViewController: UIViewController, WKNavigationDelegate, WKScriptMessageHandler {
     private var webView: WKWebView!
     private let url: URL
     private let backgroundColorHex: String?
     private static let messageHandlerName = "FlockWebView"
 
     var onClose: (() -> Void)?
-    var onSuccess: (() -> Void)?
-    var onInvalid: (() -> Void)?
+    var onSuccess: ((WebViewController) -> Void)?
+    var onInvalid: ((WebViewController) -> Void)?
 
     init(
         url: URL,
         backgroundColorHex: String? = nil,
         onClose: (() -> Void)? = nil,
-        onSuccess: (() -> Void)? = nil,
-        onInvalid: (() -> Void)? = nil
+        onSuccess: ((WebViewController) -> Void)? = nil,
+        onInvalid: ((WebViewController) -> Void)? = nil
     ) {
         self.url = url
         self.backgroundColorHex = backgroundColorHex
@@ -38,15 +38,44 @@ class WebViewController: UIViewController, WKNavigationDelegate, WKScriptMessage
         fatalError("init(coder:) has not been implemented")
     }
 
-    override func viewDidLoad() {
+    override public func viewDidLoad() {
         super.viewDidLoad()
         setNeedsStatusBarAppearanceUpdate()
 
         setupWebView()
     }
 
-    override var prefersStatusBarHidden: Bool {
+    override public var prefersStatusBarHidden: Bool {
         true
+    }
+
+    public func userContentController(_: WKUserContentController, didReceive message: WKScriptMessage) {
+        guard message.name == WebViewController.messageHandlerName,
+              let body = message.body as? String,
+              let data = body.data(using: .utf8),
+              let obj = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let event = obj["event"] as? String
+        else {
+            return
+        }
+        switch event {
+        case "close":
+            dismiss(animated: true)
+            onClose?()
+        case "success":
+            onSuccess?(self)
+        case "invalid":
+            onInvalid?(self)
+        default:
+            break
+        }
+    }
+
+    deinit {
+        let webView = self.webView
+        Task { @MainActor in
+            webView?.configuration.userContentController.removeScriptMessageHandler(forName: WebViewController.messageHandlerName)
+        }
     }
 
     private func setupWebView() {
@@ -88,34 +117,5 @@ class WebViewController: UIViewController, WKNavigationDelegate, WKScriptMessage
             webView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             webView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
-    }
-
-    func userContentController(_: WKUserContentController, didReceive message: WKScriptMessage) {
-        guard message.name == WebViewController.messageHandlerName,
-              let body = message.body as? String,
-              let data = body.data(using: .utf8),
-              let obj = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-              let event = obj["event"] as? String
-        else {
-            return
-        }
-        switch event {
-        case "close":
-            dismiss(animated: true)
-            onClose?()
-        case "success":
-            onSuccess?()
-        case "invalid":
-            onInvalid?()
-        default:
-            break
-        }
-    }
-
-    deinit {
-        let webView = self.webView
-        Task { @MainActor in
-            webView?.configuration.userContentController.removeScriptMessageHandler(forName: WebViewController.messageHandlerName)
-        }
     }
 }
