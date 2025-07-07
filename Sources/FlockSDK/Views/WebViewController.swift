@@ -71,6 +71,10 @@ public class WebViewController: UIViewController, WKNavigationDelegate, WKScript
         }
     }
 
+    public func navigate(placementId: String) {
+        sendNavigateCommand(placementId: placementId)
+    }
+
     deinit {
         let webView = self.webView
         Task { @MainActor in
@@ -83,7 +87,7 @@ public class WebViewController: UIViewController, WKNavigationDelegate, WKScript
         configuration.userContentController.add(self, name: WebViewController.messageHandlerName)
 
         // Injecting ReactNativeWebView interface to the webpage.
-        // This is a hack until our webpage support native webkit interface.
+        // This is a hack until our webpage support native webkit interface.
         let userScript = WKUserScript(source: """
           window.ReactNativeWebView = {
             postMessage: function(message) {
@@ -117,5 +121,22 @@ public class WebViewController: UIViewController, WKNavigationDelegate, WKScript
             webView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             webView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
+    }
+
+    /**
+     Sends a navigate command to the web page with the given placementId.
+     - Parameter placementId: The placement ID to navigate to.
+     */
+    private func sendNavigateCommand(placementId: String) {
+        let json: [String: Any] = [
+            "command": "navigate",
+            "data": ["placementId": placementId]
+        ]
+        if let data = try? JSONSerialization.data(withJSONObject: json, options: []),
+           let jsonString = String(data: data, encoding: .utf8)
+        {
+            let jsScript = "window.postMessage(\(jsonString));"
+            webView.evaluateJavaScript(jsScript, completionHandler: nil)
+        }
     }
 }
