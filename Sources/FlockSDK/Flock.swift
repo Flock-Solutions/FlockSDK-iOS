@@ -131,8 +131,8 @@ public class Flock: NSObject {
     public func openPage(
         type: String,
         onClose: (() -> Void)? = nil,
-        onSuccess: ((WebViewController?) -> Void)? = nil,
-        onInvalid: ((WebViewController?) -> Void)? = nil
+        onSuccess: ((WebViewController) -> Void)? = nil,
+        onInvalid: ((WebViewController) -> Void)? = nil
     ) {
         guard isInitialized else {
             Flock.logger.debug("FlockSDK is not initialized. Queuing openPage call...")
@@ -185,8 +185,8 @@ public class Flock: NSObject {
     public func addPlacement(
         placementId: String,
         onClose: (() -> Void)? = nil,
-        onSuccess: ((WebViewController?) -> Void)? = nil,
-        onInvalid: ((WebViewController?) -> Void)? = nil
+        onSuccess: ((WebViewController) -> Void)? = nil,
+        onInvalid: ((WebViewController) -> Void)? = nil
     ) {
         guard isInitialized else {
             Flock.logger.debug("FlockSDK is not initialized. Queuing addPlacement call...")

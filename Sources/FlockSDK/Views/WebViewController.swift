@@ -15,15 +15,15 @@ public class WebViewController: UIViewController, WKNavigationDelegate, WKScript
     private static let messageHandlerName = "FlockWebView"
 
     var onClose: (() -> Void)?
-    var onSuccess: ((WebViewController?) -> Void)?
-    var onInvalid: ((WebViewController?) -> Void)?
+    var onSuccess: ((WebViewController) -> Void)?
+    var onInvalid: ((WebViewController) -> Void)?
 
     init(
         url: URL,
         backgroundColorHex: String? = nil,
         onClose: (() -> Void)? = nil,
-        onSuccess: ((WebViewController?) -> Void)? = nil,
-        onInvalid: ((WebViewController?) -> Void)? = nil
+        onSuccess: ((WebViewController) -> Void)? = nil,
+        onInvalid: ((WebViewController) -> Void)? = nil
     ) {
         self.url = url
         self.backgroundColorHex = backgroundColorHex
