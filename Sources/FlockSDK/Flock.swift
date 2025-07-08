@@ -16,6 +16,9 @@ public class Flock: NSObject {
     private(set) var isInitialized = false
     private var initializationCompletionHandlers: [(Bool) -> Void] = []
 
+    /** Views */
+    private var webViewController: WebViewController?
+
     /** Entities */
     private var publicAccessKey: String?
     private var environment: FlockEnvironment?
@@ -185,8 +188,8 @@ public class Flock: NSObject {
     public func addPlacement(
         placementId: String,
         onClose: (() -> Void)? = nil,
-        onSuccess: ((WebViewController) -> Void)? = nil,
-        onInvalid: ((WebViewController) -> Void)? = nil
+        onSuccess: ((Flock) -> Void)? = nil,
+        onInvalid: ((Flock) -> Void)? = nil
     ) {
         guard isInitialized else {
             Flock.logger.debug("FlockSDK is not initialized. Queuing addPlacement call...")
@@ -200,12 +203,15 @@ public class Flock: NSObject {
             return
         }
 
+        // Dismiss existing webview controller
+        self.webViewController?.dismiss(animated: true)
+
         guard let url = buildWebPageURL(placementId: placementId) else {
             Flock.logger.error("Cannot build web page URL for placementId: \(placementId)")
             return
         }
 
-        // Find the campaign page for this type
+        // Find the campaign page for this placement
         let campaignPage = campaign?.campaignPages.first { $0.placementId?.contains(placementId) ?? false }
 
         // Use backgroundColor if available
@@ -215,9 +221,14 @@ public class Flock: NSObject {
             url: url,
             backgroundColorHex: backgroundColor,
             onClose: onClose,
-            onSuccess: onSuccess,
-            onInvalid: onInvalid
+            onSuccess: { _ in
+                onSuccess?(self)
+            },
+            onInvalid: { _ in
+                onInvalid?(self)
+            }
         )
+        self.webViewController = webViewController
 
         guard let topViewController = UIApplication.shared.topMostViewController(),
               topViewController.presentedViewController == nil
@@ -225,6 +236,27 @@ public class Flock: NSObject {
 
         webViewController.modalPresentationStyle = .fullScreen
         topViewController.present(webViewController, animated: true)
+    }
+
+    public func navigate(placementId: String) {
+        guard let webViewController else {
+            return
+        }
+
+        guard let url = buildWebPageURL(placementId: placementId) else {
+            Flock.logger.error("Cannot build web page URL for placementId: \(placementId)")
+            return
+        }
+
+        // Find the campaign page for this placement
+        let campaignPage = campaign?.campaignPages.first { $0.placementId?.contains(placementId) ?? false }
+
+        // Use backgroundColor if available
+        if let backgroundColor = campaignPage?.screenProps?.backgroundColor {
+            webViewController.setBackgroundColor(hex: backgroundColor)
+        }
+
+        webViewController.loadURL(url: url)
     }
 
     private func buildWebPageURL(placementId: String) -> URL? {

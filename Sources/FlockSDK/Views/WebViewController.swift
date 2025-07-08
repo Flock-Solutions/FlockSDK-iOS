@@ -10,8 +10,9 @@ import WebKit
 @available(iOS 13.0, *)
 public class WebViewController: UIViewController, WKNavigationDelegate, WKScriptMessageHandler {
     private var webView: WKWebView!
-    private let url: URL
-    private let backgroundColorHex: String?
+    private var url: URL
+    private var backgroundColorHex: String?
+
     private static let messageHandlerName = "FlockWebView"
 
     var onClose: (() -> Void)?
@@ -71,8 +72,16 @@ public class WebViewController: UIViewController, WKNavigationDelegate, WKScript
         }
     }
 
-    public func navigate(placementId: String) {
+    func navigate(placementId: String) {
         sendNavigateCommand(placementId: placementId)
+    }
+
+    func setBackgroundColor(hex: String) {
+        backgroundColorHex = hex
+    }
+
+    func loadURL(url: URL) {
+        webView.load(URLRequest(url: url))
     }
 
     deinit {
