@@ -105,7 +105,7 @@ public class WebViewController: UIViewController, WKNavigationDelegate, WKScript
         webView = WKWebView(frame: .zero, configuration: configuration)
         webView.load(URLRequest(url: url))
         webView.scrollView.contentInsetAdjustmentBehavior = .never
-        webView.scrollView.contentInset = UIEdgeInsets(top: 16)
+        webView.scrollView.contentInset = UIEdgeInsets(top: 16, left: 0, bottom: 0, right: 0)
         webView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         webView.navigationDelegate = self
         webView.allowsBackForwardNavigationGestures = false
