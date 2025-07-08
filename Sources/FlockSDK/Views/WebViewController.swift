@@ -80,6 +80,7 @@ public class WebViewController: UIViewController, WKNavigationDelegate, WKScript
     }
 
     func loadURL(url: URL) {
+        self.url = url
         webView.load(URLRequest(url: url))
     }
 
