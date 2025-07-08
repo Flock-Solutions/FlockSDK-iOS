@@ -105,6 +105,7 @@ public class WebViewController: UIViewController, WKNavigationDelegate, WKScript
         webView = WKWebView(frame: .zero, configuration: configuration)
         webView.load(URLRequest(url: url))
         webView.scrollView.contentInsetAdjustmentBehavior = .never
+        webView.scrollView.contentInset = UIEdgeInsets(top: 16)
         webView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         webView.navigationDelegate = self
         webView.allowsBackForwardNavigationGestures = false
@@ -116,7 +117,7 @@ public class WebViewController: UIViewController, WKNavigationDelegate, WKScript
         view.addSubview(webView)
 
         NSLayoutConstraint.activate([
-            webView.topAnchor.constraint(equalTo: view.topAnchor, constant: 16),
+            webView.topAnchor.constraint(equalTo: view.topAnchor),
             webView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             webView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             webView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
