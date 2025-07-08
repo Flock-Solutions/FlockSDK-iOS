@@ -72,12 +72,11 @@ public class WebViewController: UIViewController, WKNavigationDelegate, WKScript
         }
     }
 
-    func navigate(placementId: String) {
-        sendNavigateCommand(placementId: placementId)
-    }
-
     func setBackgroundColor(hex: String) {
         backgroundColorHex = hex
+        if let color = UIColor(hex: hex) {
+            webView.backgroundColor = color
+        }
     }
 
     func loadURL(url: URL) {
@@ -131,25 +130,5 @@ public class WebViewController: UIViewController, WKNavigationDelegate, WKScript
             webView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             webView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
-    }
-
-    /**
-     Sends a navigate command to the web page with the given placementId.
-     - Parameter placementId: The placement ID to navigate to.
-     */
-    private func sendNavigateCommand(placementId: String) {
-        let json: [String: Any] = [
-            "command": "navigate",
-            "data": ["placementId": placementId]
-        ]
-        if let data = try? JSONSerialization.data(withJSONObject: json, options: []),
-           let jsonString = String(data: data, encoding: .utf8)
-        {
-            let flockEventName = "flock_client_event"
-            let jsScript = """
-            window.dispatchEvent(new CustomEvent('\(flockEventName)', { detail: JSON.parse('\(jsonString)') }));
-            """
-            webView.evaluateJavaScript(jsScript, completionHandler: nil)
-        }
     }
 }
