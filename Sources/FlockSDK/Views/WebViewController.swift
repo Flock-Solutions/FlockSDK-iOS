@@ -138,7 +138,7 @@ public class WebViewController: UIViewController, WKNavigationDelegate, WKScript
         {
             let flockEventName = "flock_client_event"
             let jsScript = """
-            window.dispatchEvent(new CustomEvent(\"\(flockEventName)\", { detail: JSON.parse(\"\(jsonString)\") }));
+            window.dispatchEvent(new CustomEvent('\(flockEventName)', { detail: JSON.parse('\(jsonString)') }));
             """
             webView.evaluateJavaScript(jsScript, completionHandler: nil)
         }
