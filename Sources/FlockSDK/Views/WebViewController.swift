@@ -136,7 +136,10 @@ public class WebViewController: UIViewController, WKNavigationDelegate, WKScript
         if let data = try? JSONSerialization.data(withJSONObject: json, options: []),
            let jsonString = String(data: data, encoding: .utf8)
         {
-            let jsScript = "window.postMessage(\(jsonString));"
+            let flockEventName = "flock_client_event"
+            let jsScript = """
+            window.dispatchEvent(new CustomEvent(\"\(flockEventName)\", { detail: JSON.parse(\"\(jsonString)\") }));
+            """
             webView.evaluateJavaScript(jsScript, completionHandler: nil)
         }
     }
