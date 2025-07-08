@@ -102,9 +102,9 @@ public class WebViewController: UIViewController, WKNavigationDelegate, WKScript
         preferences.allowsContentJavaScript = true
         configuration.defaultWebpagePreferences = preferences
 
-        webView = WKWebView(frame: view.bounds, configuration: configuration)
+        webView = WKWebView(frame: .zero, configuration: configuration)
         webView.load(URLRequest(url: url))
-        webView.frame = view.bounds
+        webView.scrollView.contentInsetAdjustmentBehavior = .never
         webView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         webView.navigationDelegate = self
         webView.allowsBackForwardNavigationGestures = false
