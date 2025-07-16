@@ -32,7 +32,7 @@ struct CustomerService {
         let (data, response) = try await URLSession.shared.data(for: request)
 
         guard let httpResponse = response as? HTTPURLResponse, (200 ... 299).contains(httpResponse.statusCode) else {
-            logger.error("Failed to identify customer: bad server response.")
+            logger.error("Failed to identify customer: \(response)")
             throw URLError(.badServerResponse)
         }
 

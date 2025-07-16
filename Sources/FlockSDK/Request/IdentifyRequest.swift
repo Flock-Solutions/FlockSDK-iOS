@@ -8,5 +8,5 @@
 struct IdentifyRequest: Encodable {
     let externalUserId: String
     let email: String
-    let name: String?
+    let name: String
 }

@@ -63,7 +63,7 @@ public class Flock: NSObject {
         - email: The customer's email address.
         - name: The customer's name (optional).
      */
-    public func identify(externalUserId: String, email: String, name: String?) {
+    public func identify(externalUserId: String, email: String, name: String) {
         Task {
             guard let environment = self.environment else { return }
             guard let customerService = self.customerService else { return }
