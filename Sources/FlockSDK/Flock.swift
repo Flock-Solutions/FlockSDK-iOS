@@ -13,8 +13,7 @@ public class Flock: NSObject {
         category: String(describing: Flock.self)
     )
 
-    private(set) var isInitialized = false
-    private var initializationCompletionHandlers: [(Bool) -> Void] = []
+    private var identifyCompletionHandlers: [() -> Void] = []
 
     /** Views */
     private var webViewController: WebViewController?
@@ -53,32 +52,7 @@ public class Flock: NSObject {
         self.environment = environment
         campaignService = CampaignService(publicAccessKey: publicAccessKey, baseURL: overrideApiURL ?? apiBaseUrl)
         customerService = CustomerService(publicAccessKey: publicAccessKey, baseURL: overrideApiURL ?? apiBaseUrl)
-
-        // Fetch the live campaign from Flock
-        Task { @MainActor in
-            guard let campaignService = self.campaignService else { return }
-            do {
-                let campaign = try await campaignService.getLiveCampaign(environment: environment)
-                self.campaign = campaign
-                self.isInitialized = true
-                completion?(true)
-                self.initializationCompletionHandlers.forEach { $0(true) }
-                self.initializationCompletionHandlers.removeAll()
-            } catch {
-                Flock.logger.error("Error during initialization: \(error)")
-                completion?(false)
-                self.initializationCompletionHandlers.forEach { $0(false) }
-                self.initializationCompletionHandlers.removeAll()
-            }
-
-            // Pinging the server
-            guard let campaign = self.campaign else { return }
-            do {
-                try await campaignService.ping(campaignId: campaign.id)
-            } catch {
-                Flock.logger.warning("Error pinging Flock: \(error)")
-            }
-        }
+        completion?(true)
     }
 
     /**
@@ -90,30 +64,29 @@ public class Flock: NSObject {
         - name: The customer's name (optional).
      */
     public func identify(externalUserId: String, email: String, name: String?) {
-        guard isInitialized else {
-            Flock.logger.debug("FlockSDK is not initialized. Queuing identify call...")
-            // Queue the identify call to be called after initialization
-            initializationCompletionHandlers.append { [weak self] success in
-                guard success else {
-                    return
-                }
-                self?.identify(externalUserId: externalUserId, email: email, name: name)
-            }
-            return
-        }
-
         Task {
-            guard let campaign else { return }
             guard let customerService = self.customerService else { return }
+            guard let environment = self.environment else { return }
+            guard let campaignService = self.campaignService else { return }
 
             do {
                 let identifyRequest = IdentifyRequest(
-                    externalUserId: externalUserId, email: email, name: name, campaignId: campaign.id
+                    externalUserId: externalUserId, email: email, name: name
                 )
 
                 self.customer = try await customerService.identify(identifyRequest: identifyRequest)
+
+                // Fetch the live campaign after identifying the customer
+                guard let customerId = self.customer?.id else { return }
+                let campaign = try await campaignService.getLiveCampaign(environment: environment, customerId: customerId)
+                self.campaign = campaign
+
+                // Run all queued handlers after identify is complete
+                let handlers = self.identifyCompletionHandlers
+                self.identifyCompletionHandlers.removeAll()
+                handlers.forEach { $0() }
             } catch {
-                Flock.logger.error("Error identifying customer: \(error)")
+                Flock.logger.error("Error identifying customer or fetching campaign: \(error)")
             }
         }
     }
@@ -137,13 +110,11 @@ public class Flock: NSObject {
         onSuccess: ((WebViewController) -> Void)? = nil,
         onInvalid: ((WebViewController) -> Void)? = nil
     ) {
-        guard isInitialized else {
-            Flock.logger.debug("FlockSDK is not initialized. Queuing openPage call...")
-            // Queue the openPage call to be called after initialization
-            initializationCompletionHandlers.append { [weak self] success in
-                guard success else {
-                    return
-                }
+        guard customer != nil, campaign != nil else {
+            // Queue this call until after identify completes
+            Flock.logger.debug("Customer not identified. Queuing openPage call...")
+
+            identifyCompletionHandlers.append { [weak self] in
                 self?.openPage(type: type, onClose: onClose, onSuccess: onSuccess, onInvalid: onInvalid)
             }
             return
@@ -191,13 +162,11 @@ public class Flock: NSObject {
         onSuccess: ((Flock) -> Void)? = nil,
         onInvalid: ((Flock) -> Void)? = nil
     ) {
-        guard isInitialized else {
-            Flock.logger.debug("FlockSDK is not initialized. Queuing addPlacement call...")
-            // Queue the addPlacement call to be called after initialization
-            initializationCompletionHandlers.append { [weak self] success in
-                guard success else {
-                    return
-                }
+        guard customer != nil, campaign != nil else {
+            // Queue this call until after identify completes
+            Flock.logger.debug("Customer not identified. Skipping addPlacement call...")
+
+            identifyCompletionHandlers.append { [weak self] in
                 self?.addPlacement(placementId: placementId, onClose: onClose, onSuccess: onSuccess, onInvalid: onInvalid)
             }
             return

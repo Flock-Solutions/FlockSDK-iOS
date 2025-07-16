@@ -23,11 +23,12 @@ struct CampaignService {
         requestBuilder = RequestBuilder(apiKey: publicAccessKey)
     }
 
-    func getLiveCampaign(environment: FlockEnvironment) async throws -> Campaign {
+    func getLiveCampaign(environment: FlockEnvironment, customerId: String) async throws -> Campaign {
         var components = try URLComponents(url: urlBuilder.build(path: "/campaigns/live"), resolvingAgainstBaseURL: true)
 
         components?.queryItems = [
-            URLQueryItem(name: "environment", value: environment.rawValue)
+            URLQueryItem(name: "environment", value: environment.rawValue),
+            URLQueryItem(name: "customerId", value: customerId)
         ]
         guard let url = components?.url else {
             throw URLError(.badURL)
