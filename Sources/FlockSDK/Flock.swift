@@ -65,8 +65,8 @@ public class Flock: NSObject {
      */
     public func identify(externalUserId: String, email: String, name: String?) {
         Task {
-            guard let customerService = self.customerService else { return }
             guard let environment = self.environment else { return }
+            guard let customerService = self.customerService else { return }
             guard let campaignService = self.campaignService else { return }
 
             do {
@@ -78,13 +78,14 @@ public class Flock: NSObject {
 
                 // Fetch the live campaign after identifying the customer
                 guard let customerId = self.customer?.id else { return }
-                let campaign = try await campaignService.getLiveCampaign(environment: environment, customerId: customerId)
-                self.campaign = campaign
+                self.campaign = try await campaignService.getLiveCampaign(environment: environment, customerId: customerId)
 
                 // Run all queued handlers after identify is complete
                 let handlers = self.identifyCompletionHandlers
                 self.identifyCompletionHandlers.removeAll()
                 handlers.forEach { $0() }
+
+                Flock.logger.debug("Customer identified")
             } catch {
                 Flock.logger.error("Error identifying customer or fetching campaign: \(error)")
             }
@@ -164,7 +165,7 @@ public class Flock: NSObject {
     ) {
         guard customer != nil, campaign != nil else {
             // Queue this call until after identify completes
-            Flock.logger.debug("Customer not identified. Skipping addPlacement call...")
+            Flock.logger.debug("Customer not identified. Queuing addPlacement call...")
 
             identifyCompletionHandlers.append { [weak self] in
                 self?.addPlacement(placementId: placementId, onClose: onClose, onSuccess: onSuccess, onInvalid: onInvalid)
