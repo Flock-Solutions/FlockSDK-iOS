@@ -84,8 +84,6 @@ public class Flock: NSObject {
                 let handlers = self.identifyCompletionHandlers
                 self.identifyCompletionHandlers.removeAll()
                 handlers.forEach { $0() }
-
-                Flock.logger.debug("Customer identified")
             } catch {
                 Flock.logger.error("Error identifying customer or fetching campaign: \(error)")
             }
