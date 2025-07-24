@@ -58,12 +58,13 @@ public class Flock: NSObject {
     /**
      Identifies a customer to keep a record in Flock.
 
-     - Parameters:
+     - Parameters:
         - externalUserId: The unique identifier for the user in your system.
         - email: The customer's email address.
         - name: The customer's name (optional).
+        - customProperties: Optional custom properties for the customer (string | number | boolean | null values only).
      */
-    public func identify(externalUserId: String, email: String, name: String) {
+    public func identify(externalUserId: String, email: String, name: String, customProperties: CustomProperties? = nil) {
         Task {
             guard let environment = self.environment else { return }
             guard let customerService = self.customerService else { return }
@@ -71,7 +72,7 @@ public class Flock: NSObject {
 
             do {
                 let identifyRequest = IdentifyRequest(
-                    externalUserId: externalUserId, email: email, name: name
+                    externalUserId: externalUserId, email: email, name: name, customProperties: customProperties
                 )
 
                 self.customer = try await customerService.identify(identifyRequest: identifyRequest)
