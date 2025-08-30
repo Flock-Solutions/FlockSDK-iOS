@@ -100,51 +100,13 @@ public class Flock: NSObject {
     }
 
     /**
-     Triggers a checkpoint by name and adds a placement for the matching campaign checkpoint.
+     Creates a builder for configuring and executing a checkpoint.
 
-     - Parameters:
-        - checkpointName: The name of the checkpoint to trigger.
-        - options: Optional configuration for the checkpoint behavior.
-        - onClose: Callback executed when the placement is closed.
-        - onSuccess: Callback executed when the placement reports a success event.
-        - onInvalid: Callback executed when the placement reports an invalid event.
+     - Parameter name: The name of the checkpoint to trigger.
+     - Returns: A CheckpointBuilder instance for method chaining.
      */
-    public func checkpoint(
-        checkpointName: String,
-        options: CheckpointOptions = CheckpointOptions(),
-        onClose: (() -> Void)? = nil,
-        onSuccess: ((Flock) -> Void)? = nil,
-        onInvalid: ((Flock) -> Void)? = nil
-    ) {
-        guard let campaignCheckpoints else {
-            Flock.logger.error("Campaign checkpoints not loaded. Make sure to call identify() first.")
-            return
-        }
-
-        // Find the checkpoint by name
-        guard let checkpoint = campaignCheckpoints.first(where: { $0.checkpointName == checkpointName }) else {
-            Flock.logger.error("Checkpoint with name '\(checkpointName)' not found.")
-            return
-        }
-
-        // Add placement using the checkpoint's placementId
-        guard let placementId = checkpoint.placementId else {
-            Flock.logger.error("Checkpoint '\(checkpointName)' does not have a placementId.")
-            return
-        }
-
-        if options.navigate {
-            // Navigate to the placement within existing webViewController
-            navigate(placementId: placementId)
-        } else {
-            // Add new placement
-            addPlacement(
-                placementId: placementId,
-                onClose: onClose,
-                onSuccess: onSuccess,
-                onInvalid: onInvalid
-            )
-        }
+    public func checkpoint(_ name: String) -> CheckpointBuilder {
+        CheckpointBuilder(name: name, flock: self)
     }
 
     /**
@@ -307,5 +269,46 @@ public class Flock: NSObject {
         }
 
         return try await campaignCheckpointService.getCampaignCheckpoints(campaignId: campaignId)
+    }
+
+    /**
+     Internal method to trigger checkpoint logic.
+     */
+    func triggerCheckpoint(
+        checkpointName: String,
+        options: CheckpointOptions,
+        onClose: (() -> Void)?,
+        onSuccess: ((Flock) -> Void)?,
+        onInvalid: ((Flock) -> Void)?
+    ) {
+        guard let campaignCheckpoints else {
+            Flock.logger.error("Campaign checkpoints not loaded. Make sure to call identify() first.")
+            return
+        }
+
+        // Find the checkpoint by name
+        guard let checkpoint = campaignCheckpoints.first(where: { $0.checkpointName == checkpointName }) else {
+            Flock.logger.error("Checkpoint with name '\(checkpointName)' not found.")
+            return
+        }
+
+        // Add placement using the checkpoint's placementId
+        guard let placementId = checkpoint.placementId else {
+            Flock.logger.error("Checkpoint '\(checkpointName)' does not have a placementId.")
+            return
+        }
+
+        if options.navigate {
+            // Navigate to the placement within existing webViewController
+            navigate(placementId: placementId)
+        } else {
+            // Add new placement
+            addPlacement(
+                placementId: placementId,
+                onClose: onClose,
+                onSuccess: onSuccess,
+                onInvalid: onInvalid
+            )
+        }
     }
 }
