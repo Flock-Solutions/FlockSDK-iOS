@@ -25,7 +25,7 @@ Add to your Xcode project via `File > Add Packages...` and use this repo's URL:
 <https://github.com/Flock-Solutions/FlockSDK-iOS.git>
 
 ```swift
-.package(url: "https://github.com/Flock-Solutions/FlockSDK-iOS.git", from: "1.0.0")
+.package(url: "https://github.com/Flock-Solutions/FlockSDK-iOS.git", from: "0.2.0")
 ```
 
 Then add `"FlockSDK"` as a dependency for your target.
