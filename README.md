@@ -85,7 +85,6 @@ Flock.shared.checkpoint("user_onboarded")
         // Navigate to success screen when invitee enters valid referral code
         flock.checkpoint("referral_succeeded").navigate().trigger()
     }
-
     .trigger()
 ```
 
