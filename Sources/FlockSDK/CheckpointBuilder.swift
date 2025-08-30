@@ -6,6 +6,7 @@
 //
 
 @available(iOS 14.0, *)
+@MainActor
 public class CheckpointBuilder {
     private let name: String
     private let flock: Flock
