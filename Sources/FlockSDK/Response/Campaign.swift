@@ -1,10 +1,3 @@
-//
-//  Campaign.swift
-//  FlockSDK
-//
-//  Created by Hoa Nguyen on 2024-10-04.
-//
-
 public struct Campaign: Codable, Sendable {
     public let id: String
     public let name: String

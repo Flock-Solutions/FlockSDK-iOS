@@ -23,10 +23,12 @@ public class Flock: NSObject {
     private var environment: FlockEnvironment?
     private var campaign: Campaign?
     private var customer: Customer?
+    private var campaignCheckpoints: [CampaignCheckpoint]?
 
     /** Services */
     private var campaignService: CampaignService?
     private var customerService: CustomerService?
+    private var campaignCheckpointService: CampaignCheckpointService?
 
     /** Base URLs */
     private var uiBaseUrl: String = "https://app.withflock.com"
@@ -52,13 +54,14 @@ public class Flock: NSObject {
         self.environment = environment
         campaignService = CampaignService(publicAccessKey: publicAccessKey, baseURL: overrideApiURL ?? apiBaseUrl)
         customerService = CustomerService(publicAccessKey: publicAccessKey, baseURL: overrideApiURL ?? apiBaseUrl)
+        campaignCheckpointService = CampaignCheckpointService(publicAccessKey: publicAccessKey, baseURL: overrideApiURL ?? apiBaseUrl)
         completion?(true)
     }
 
     /**
      Identifies a customer to keep a record in Flock.
 
-     - Parameters:
+     - Parameters:
         - externalUserId: The unique identifier for the user in your system.
         - email: The customer's email address.
         - name: The customer's name (optional).
@@ -81,6 +84,11 @@ public class Flock: NSObject {
                 guard let customerId = self.customer?.id else { return }
                 self.campaign = try await campaignService.getLiveCampaign(environment: environment, customerId: customerId)
 
+                // Fetch campaign checkpoints after getting the campaign
+                if let campaignId = self.campaign?.id {
+                    self.campaignCheckpoints = try await self.getCampaignCheckpoints(campaignId: campaignId)
+                }
+
                 // Run all queued handlers after identify is complete
                 let handlers = self.identifyCompletionHandlers
                 self.identifyCompletionHandlers.removeAll()
@@ -92,59 +100,51 @@ public class Flock: NSObject {
     }
 
     /**
-     Opens a Flock web page in a modal or fullscreen style.
-
-     WARNING: This method is deprecated. Use addPlacement with placementId instead.
+     Triggers a checkpoint by name and adds a placement for the matching campaign checkpoint.
 
      - Parameters:
-        - type: The page type or path to open
-        - style: Presentation style (.modal or .fullscreen). Default is .fullscreen.
-        - onClose: Callback executed when the page is closed.
-        - onSuccess: Callback executed when the page reports a success event.
-        - onInvalid: Callback executed when the page reports an invalid event.
+        - checkpointName: The name of the checkpoint to trigger.
+        - options: Optional configuration for the checkpoint behavior.
+        - onClose: Callback executed when the placement is closed.
+        - onSuccess: Callback executed when the placement reports a success event.
+        - onInvalid: Callback executed when the placement reports an invalid event.
      */
-    @available(*, deprecated, message: "Use addPlacement with placementId instead")
-    public func openPage(
-        type: String,
+    public func checkpoint(
+        checkpointName: String,
+        options: CheckpointOptions = CheckpointOptions(),
         onClose: (() -> Void)? = nil,
-        onSuccess: ((WebViewController) -> Void)? = nil,
-        onInvalid: ((WebViewController) -> Void)? = nil
+        onSuccess: ((Flock) -> Void)? = nil,
+        onInvalid: ((Flock) -> Void)? = nil
     ) {
-        guard customer != nil, campaign != nil else {
-            // Queue this call until after identify completes
-            Flock.logger.debug("Customer not identified. Queuing openPage call...")
-
-            identifyCompletionHandlers.append { [weak self] in
-                self?.openPage(type: type, onClose: onClose, onSuccess: onSuccess, onInvalid: onInvalid)
-            }
+        guard let campaignCheckpoints else {
+            Flock.logger.error("Campaign checkpoints not loaded. Make sure to call identify() first.")
             return
         }
 
-        guard let url = buildWebPageURL(type: type) else {
-            Flock.logger.error("Cannot build web page URL for type: \(type)")
+        // Find the checkpoint by name
+        guard let checkpoint = campaignCheckpoints.first(where: { $0.checkpointName == checkpointName }) else {
+            Flock.logger.error("Checkpoint with name '\(checkpointName)' not found.")
             return
         }
 
-        // Find the campaign page for this type
-        let campaignPage = campaign?.campaignPages.first { $0.path.contains(type) }
+        // Add placement using the checkpoint's placementId
+        guard let placementId = checkpoint.placementId else {
+            Flock.logger.error("Checkpoint '\(checkpointName)' does not have a placementId.")
+            return
+        }
 
-        // Use backgroundColor if available
-        let backgroundColor = campaignPage?.screenProps?.backgroundColor
-
-        let webViewController = WebViewController(
-            url: url,
-            backgroundColorHex: backgroundColor,
-            onClose: onClose,
-            onSuccess: onSuccess,
-            onInvalid: onInvalid
-        )
-
-        guard let topViewController = UIApplication.shared.topMostViewController(),
-              topViewController.presentedViewController == nil
-        else { return }
-
-        webViewController.modalPresentationStyle = .fullScreen
-        topViewController.present(webViewController, animated: true)
+        if options.navigate {
+            // Navigate to the placement within existing webViewController
+            navigate(placementId: placementId)
+        } else {
+            // Add new placement
+            addPlacement(
+                placementId: placementId,
+                onClose: onClose,
+                onSuccess: onSuccess,
+                onInvalid: onInvalid
+            )
+        }
     }
 
     /**
@@ -156,6 +156,7 @@ public class Flock: NSObject {
         - onSuccess: Callback executed when the placement reports a success event.
         - onInvalid: Callback executed when the placement reports an invalid event.
      */
+    @available(*, deprecated, message: "Use checkpoint(checkpointName:) instead")
     public func addPlacement(
         placementId: String,
         onClose: (() -> Void)? = nil,
@@ -207,6 +208,7 @@ public class Flock: NSObject {
         topViewController.present(webViewController, animated: true)
     }
 
+    @available(*, deprecated, message: "Use checkpoint(checkpointName:) instead")
     public func navigate(placementId: String) {
         guard let webViewController else {
             return
@@ -290,5 +292,20 @@ public class Flock: NSObject {
         }
 
         return URL(string: urlString)
+    }
+
+    /**
+     Gets campaign checkpoints for a specific campaign.
+
+     - Parameters:
+        - campaignId: The unique identifier for the campaign.
+     - Returns: An array of campaign checkpoints.
+     */
+    private func getCampaignCheckpoints(campaignId: String) async throws -> [CampaignCheckpoint] {
+        guard let campaignCheckpointService else {
+            throw URLError(.badURL)
+        }
+
+        return try await campaignCheckpointService.getCampaignCheckpoints(campaignId: campaignId)
     }
 }
