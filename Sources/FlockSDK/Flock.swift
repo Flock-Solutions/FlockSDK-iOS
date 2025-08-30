@@ -288,13 +288,13 @@ public class Flock: NSObject {
 
         // Find the checkpoint by name
         guard let checkpoint = campaignCheckpoints.first(where: { $0.checkpointName == checkpointName }) else {
-            Flock.logger.error("Checkpoint with name '\(checkpointName)' not found.")
+            Flock.logger.debug("Checkpoint with name '\(checkpointName)' not found.")
             return
         }
 
         // Add placement using the checkpoint's placementId
         guard let placementId = checkpoint.placementId else {
-            Flock.logger.error("Checkpoint '\(checkpointName)' does not have a placementId.")
+            Flock.logger.debug("Checkpoint '\(checkpointName)' does not have a placementId.")
             return
         }
 

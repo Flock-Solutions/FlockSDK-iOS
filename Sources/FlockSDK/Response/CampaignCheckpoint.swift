@@ -1,9 +1,6 @@
 public enum CheckpointTrigger: String, Codable, Sendable {
-    case pageView = "page_view"
-    case scroll
-    case click
-    case timeOnPage = "time_on_page"
-    case custom
+    case placement
+    case reward
 }
 
 public struct CampaignCheckpoint: Codable, Sendable {
