@@ -143,8 +143,10 @@ public class Flock: NSObject {
             return
         }
 
-        // Find the campaign page for this placement
-        let campaignPage = campaign?.campaignPages.first { $0.placementId?.contains(placementId) ?? false }
+        // Find the campaign page for this placement by placementId or id
+        let campaignPage = campaign?.campaignPages.first { page in
+            page.placementId == placementId || page.id == placementId
+        }
 
         // Use backgroundColor if available
         let backgroundColor = campaignPage?.screenProps?.backgroundColor
@@ -181,8 +183,10 @@ public class Flock: NSObject {
             return
         }
 
-        // Find the campaign page for this placement
-        let campaignPage = campaign?.campaignPages.first { $0.placementId?.contains(placementId) ?? false }
+        // Find the campaign page for this placement by placementId or id
+        let campaignPage = campaign?.campaignPages.first { page in
+            page.placementId == placementId || page.id == placementId
+        }
 
         // Use backgroundColor if available
         if let backgroundColor = campaignPage?.screenProps?.backgroundColor {
@@ -207,8 +211,10 @@ public class Flock: NSObject {
             urlString += "&customer_id=\(customerId)"
         }
 
-        // Find the campaign page for this type
-        let campaignPage = campaign?.campaignPages.first { $0.placementId?.contains(placementId) ?? false }
+        // Find the campaign page for this type by placementId or id
+        let campaignPage = campaign?.campaignPages.first { page in
+            page.placementId == placementId || page.id == placementId
+        }
 
         // Use backgroundColor if available
         let backgroundColor = campaignPage?.screenProps?.backgroundColor?.addingPercentEncoding(withAllowedCharacters: .alphanumerics)
