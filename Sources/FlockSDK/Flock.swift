@@ -225,43 +225,6 @@ public class Flock: NSObject {
         return URL(string: urlString)
     }
 
-    private func buildWebPageURL(placementId: String) -> URL? {
-        // Split type into path and query
-        let parts = placementId.split(separator: "?", maxSplits: 1, omittingEmptySubsequences: false)
-        let path = String(parts.first ?? "")
-        let query = parts.count > 1 ? String(parts[1]) : ""
-
-        // Find the campaign page for this type
-        let campaignPage = campaign?.campaignPages.first { $0.path.contains(placementId) }
-
-        // Use backgroundColor if available
-        let backgroundColor = campaignPage?.screenProps?.backgroundColor
-
-        // Prepare base url
-        let appBaseURL = "https://app.withflock.com"
-
-        // Build URL string
-        var urlString = "\(appBaseURL)/pages/\(path)?key=\(publicAccessKey ?? "")"
-
-        if let campaignId = campaign?.id {
-            urlString += "&campaign_id=\(campaignId)"
-        }
-
-        if let customerId = customer?.id {
-            urlString += "&customer_id=\(customerId)"
-        }
-
-        if let backgroundColor {
-            urlString += "&bg=\(backgroundColor)"
-        }
-
-        if !query.isEmpty {
-            urlString += "&\(query)"
-        }
-
-        return URL(string: urlString)
-    }
-
     /**
      Gets campaign checkpoints for a specific campaign.
 
