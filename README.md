@@ -5,8 +5,10 @@ FlockSDK-iOS is the official iOS SDK for integrating [Flock](https://www.withflo
 ## Features
 
 - Identify and track customers in your app.
-- Easily show Flock referral experiences as modals or full screen.
+- Trigger checkpoints to show Flock experiences at specific moments in your user journey.
+- Navigate within existing web views or create new placements.
 - Handle events such as close, success, and invalid directly in your app.
+- Modern Swift builder pattern API for easy configuration.
 - Built with Swift and officially supported by the Flock team.
 
 ## Requirements
@@ -55,25 +57,36 @@ try? Flock.shared.identify(
 )
 ```
 
-### 3\. Show a Flock Page
+### 3\. Trigger Checkpoints
 
-Present the referral page anywhere in your app:
+Trigger checkpoints to show Flock experiences at specific moments in your user journey:
 
 ```swift
 import FlockSDK
 
-try? Flock.shared.openPage(
-    type: "referrer", // Or "invitee" or "invitee?state=success"
-    onClose: {
-        // Called when closed
-    },
-    onSuccess: {
-        // Called for success event
-    },
-    onInvalid: {
-        // Called for invalid event
+// Simple checkpoint trigger
+Flock.shared.checkpoint("refer_button_clicked").trigger()
+
+Flock.shared.checkpoint("refer_button_clicked")
+    .onClose {
+        print("Checkpoint closed")
     }
-)
+    .onSuccess { flock in
+        print("Checkpoint succeeded")
+    }
+    .onInvalid { flock in
+        print("Checkpoint invalid")
+    }
+    .trigger()
+
+// Checkpoint with navigation in success callback (e.g., show success screen)
+Flock.shared.checkpoint("user_onboarded")
+    .onSuccess { flock in
+        // Navigate to success screen when invitee enters valid referral code
+        flock.checkpoint("referral_succeeded").navigate().trigger()
+    }
+
+    .trigger()
 ```
 
 ## Support
