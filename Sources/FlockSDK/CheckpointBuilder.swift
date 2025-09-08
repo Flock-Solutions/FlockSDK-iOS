@@ -28,7 +28,16 @@ public class CheckpointBuilder {
      */
     @discardableResult
     public func navigate(_ shouldNavigate: Bool = true) -> CheckpointBuilder {
-        options = CheckpointOptions(navigate: shouldNavigate)
+        options.navigate = shouldNavigate
+        return self
+    }
+
+    /**
+     Sets custom query parameters that will be appended to the placement URL.
+     */
+    @discardableResult
+    public func query(params: [String: String]) -> CheckpointBuilder {
+        options.queryParams = params
         return self
     }
 

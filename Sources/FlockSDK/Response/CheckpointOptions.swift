@@ -1,7 +1,9 @@
 public struct CheckpointOptions {
-    public let navigate: Bool
+    public var navigate: Bool
+    public var queryParams: [String: String]?
 
-    public init(navigate: Bool = false) {
+    public init(navigate: Bool = false, queryParams: [String: String]? = nil) {
         self.navigate = navigate
+        self.queryParams = queryParams
     }
 }

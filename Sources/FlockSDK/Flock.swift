@@ -114,6 +114,7 @@ public class Flock: NSObject {
 
      - Parameters:
         - placementId: The unique identifier for the placement
+        - queryParams: Optional query parameters appended to the placement URL
         - onClose: Callback executed when the placement is closed.
         - onSuccess: Callback executed when the placement reports a success event.
         - onInvalid: Callback executed when the placement reports an invalid event.
@@ -123,7 +124,8 @@ public class Flock: NSObject {
         placementId: String,
         onClose: (() -> Void)? = nil,
         onSuccess: ((Flock) -> Void)? = nil,
-        onInvalid: ((Flock) -> Void)? = nil
+        onInvalid: ((Flock) -> Void)? = nil,
+        queryParams: [String: String]? = nil
     ) {
         guard customer != nil, campaign != nil else {
             // Queue this call until after identify completes
@@ -138,7 +140,7 @@ public class Flock: NSObject {
         // Dismiss existing webview controller
         self.webViewController?.dismiss(animated: true)
 
-        guard let url = buildWebPageURL(placementId: placementId) else {
+        guard let url = buildWebPageURL(placementId: placementId, queryParams: queryParams) else {
             Flock.logger.error("Cannot build web page URL for placementId: \(placementId)")
             return
         }
@@ -173,12 +175,12 @@ public class Flock: NSObject {
     }
 
     @available(*, deprecated, message: "Use checkpoint(checkpointName:) instead")
-    public func navigate(placementId: String) {
+    public func navigate(placementId: String, queryParams: [String: String]? = nil) {
         guard let webViewController else {
             return
         }
 
-        guard let url = buildWebPageURL(placementId: placementId) else {
+        guard let url = buildWebPageURL(placementId: placementId, queryParams: queryParams) else {
             Flock.logger.error("Cannot build web page URL for placementId: \(placementId)")
             return
         }
@@ -196,7 +198,7 @@ public class Flock: NSObject {
         webViewController.loadURL(url: url)
     }
 
-    private func buildWebPageURL(placementId: String) -> URL? {
+    private func buildWebPageURL(placementId: String, queryParams: [String: String]? = nil) -> URL? {
         // Prepare base url
         let uiBaseUrl = uiBaseUrl
 
@@ -220,6 +222,15 @@ public class Flock: NSObject {
         let backgroundColor = campaignPage?.screenProps?.backgroundColor?.addingPercentEncoding(withAllowedCharacters: .alphanumerics)
         if let backgroundColor {
             urlString += "&bg=\(backgroundColor)"
+        }
+
+        // Append any custom query parameters
+        if let queryParams, !queryParams.isEmpty {
+            for (rawKey, rawValue) in queryParams {
+                let key = rawKey.addingPercentEncoding(withAllowedCharacters: .alphanumerics) ?? rawKey
+                let value = rawValue.addingPercentEncoding(withAllowedCharacters: .alphanumerics) ?? rawValue
+                urlString += "&\(key)=\(value)"
+            }
         }
 
         return URL(string: urlString)
@@ -269,11 +280,12 @@ public class Flock: NSObject {
 
         if options.navigate {
             // Navigate to the placement within existing webViewController
-            navigate(placementId: placementId)
+            navigate(placementId: placementId, queryParams: options.queryParams)
         } else {
             // Add new placement
             addPlacement(
                 placementId: placementId,
+                queryParams: options.queryParams,
                 onClose: onClose,
                 onSuccess: onSuccess,
                 onInvalid: onInvalid
