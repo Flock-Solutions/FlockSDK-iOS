@@ -285,10 +285,10 @@ public class Flock: NSObject {
             // Add new placement
             addPlacement(
                 placementId: placementId,
-                queryParams: options.queryParams,
                 onClose: onClose,
                 onSuccess: onSuccess,
-                onInvalid: onInvalid
+                onInvalid: onInvalid,
+                queryParams: options.queryParams
             )
         }
     }
