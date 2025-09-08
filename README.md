@@ -50,10 +50,19 @@ try? Flock.shared.initialize(
 Identify the current user (after login or at app start):
 
 ```swift
+import FlockSDK
+
 try? Flock.shared.identify(
     externalUserId: "<USER_ID_IN_YOUR_APP>",
     email: "user@example.com",
-    name: "Alice Smith"
+    name: "Alice Smith",
+    customProperties: [
+        "plan": .string("pro"),
+        "age": .int(29),
+        "lifetimeValue": .double(1234.56),
+        "notificationsEnabled": .bool(true),
+        "nickname": .null
+    ]
 )
 ```
 
