@@ -75,7 +75,7 @@ public class Flock: NSObject {
 
             do {
                 let identifyRequest = IdentifyRequest(
-                    externalUserId: externalUserId, email: email, name: name, customProperties: customProperties
+                    externalUserId: externalUserId, email: email, name: name, environment: environment, customProperties: customProperties
                 )
 
                 self.customer = try await customerService.identify(identifyRequest: identifyRequest)
